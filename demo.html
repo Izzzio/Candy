@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Candy Demo - Vitamin Blockchain driven Web Application</title>
+
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #0f0f0f;
+            text-align: center;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div style="text-align: center">
+    <img src="logo.png">
+</div>
+
+<h2>Image from blockchain:</h2>
+<img id="demoImage" >
+
+<p style="font-weight: 500">Current blockchain info:</p>
+<b>Blockchain height: </b><span id="height">0</span> <br>
+<b>Active connections: </b><span id="connections">0</span> <br>
+
+<script src="candy.js"></script>
+<script>
+    var candy = new Candy(['ws://node4.bitcoen.io:6001']).start();
+    candy.onready = function () {
+        candy.loadResource(432, function (err, data) {
+            document.getElementById('demoImage').src = data.candyData;
+        });
+    };
+
+    setInterval(function () {
+        document.getElementById('height').innerHTML = candy.blockHeight;
+        document.getElementById('connections').innerHTML = candy.connections;
+    }, 1000);
+
+</script>
+</body>
+</html>
