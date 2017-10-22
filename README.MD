@@ -1,3 +1,5 @@
+![Candy logo](https://github.com/VitaminBlockchain/Candy/raw/master/logo.png)
+
 # Candy
 **Vitamin blockchain connection provider for browsers**
 
