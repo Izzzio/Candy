@@ -7,11 +7,25 @@
     <style>
         body {
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            background-color: #0f0f0f;
+            background-color: #1f1f1f;
             color: white;
         }
         .center{
             text-align: center;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            white-space: -moz-pre-wrap;
+            white-space: -pre-wrap;
+            white-space: -o-pre-wrap;
+            word-wrap: break-word;
+            background-color: #000000;
+            border: 0.5px dashed #808080;
+            margin-top: 1.5em;
+            margin-bottom: 1.5em;
+            padding: 0.125rem 0.3125rem 0.0625rem;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -40,6 +54,7 @@
 <script>
     $(document).ready(function () {
         $.get('/Candy/README.MD', function (data) {
+            showdown.setFlavor('github');
             var converter = new showdown.Converter();
             $('#markdownPlaceholder').html(converter.makeHtml(data));
             $('img').parent().addClass('center');
