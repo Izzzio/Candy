@@ -4,16 +4,17 @@
  * @Author: Andrey Nedobylsky
  */
 
-const BlockchainMessageType = {
+const MessageType = {
     QUERY_LATEST: 0,
     QUERY_ALL: 1,
     RESPONSE_BLOCKCHAIN: 2,
-    MY_PEERS: 3
+    MY_PEERS: 3,
+    BROADCAST: 4
 };
 
 const BlockchainRequestors = {
     queryAllMsg: function (fromIndex) {
-        return {'type': BlockchainMessageType.QUERY_ALL, data: typeof fromIndex === 'undefined' ? 0 : fromIndex}
+        return {'type': MessageType.QUERY_ALL, data: typeof fromIndex === 'undefined' ? 0 : fromIndex}
     }
 };
 
@@ -25,6 +26,13 @@ function Candy(nodeList) {
     this.sockets = [];
     this.blockHeight = 0;
     this.resourceQueue = {};
+    this.lastMsgTimestamp = 0;
+
+    /**
+     * Current reciever address. Override allowed
+     * @type {string}
+     */
+    this.recieverAddress = (Math.random() * (new Date().getTime())).toString(36).replace(/[^a-z]+/g, '');
 
     /**
      * On data recived callback
@@ -42,6 +50,14 @@ function Candy(nodeList) {
     };
 
     /**
+     * If message recived
+     * @param {object} message
+     */
+    this.onmessage = function (message) {
+
+    };
+
+    /**
      * Internal data handler
      * @param {WebSocket} source
      * @param {Object} data
@@ -54,7 +70,7 @@ function Candy(nodeList) {
         }
 
         //Data block recived
-        if(data.type === BlockchainMessageType.RESPONSE_BLOCKCHAIN) {
+        if(data.type === MessageType.RESPONSE_BLOCKCHAIN) {
             try {
                 /**
                  * @var {Block} block
@@ -78,7 +94,7 @@ function Candy(nodeList) {
         }
 
         //New peers recived
-        if(data.type === BlockchainMessageType.MY_PEERS) {
+        if(data.type === MessageType.MY_PEERS) {
             for (let a in data.data) {
                 if(data.data.hasOwnProperty(a)) {
                     if(that.nodeList.indexOf(data.data[a]) == -1) {
@@ -90,6 +106,22 @@ function Candy(nodeList) {
                 }
             }
             that.nodeList = Array.from(new Set(that.nodeList));
+        }
+
+        if(data.type === MessageType.BROADCAST) {
+            if(data.reciver === that.recieverAddress && that.lastMsgTimestamp < data.timestamp) {
+                that.lastMsgTimestamp = data.timestamp;
+                if(typeof that.onmessage === 'function') {
+                    if(that.onmessage(data)) {
+                        return;
+                    }
+                }
+            } else {
+                if(data.recepient !== that.recieverAddress) {
+                    data.TTL++;
+                    that.broadcast(data);
+                }
+            }
         }
     };
 
@@ -131,12 +163,39 @@ function Candy(nodeList) {
      * Broadcast message to peers
      * @param message
      */
-    this.broadcastMessage = function (message) {
+    this.broadcast = function (message) {
+        if(typeof message !== 'string') {
+            message = JSON.stringify(message);
+        }
         for (let a in that.sockets) {
             if(that.sockets.hasOwnProperty(a) && that.sockets[a] !== null) {
-                that.sockets[a].send(message);
+                try {
+                    that.sockets[a].send(message);
+                } catch (e) {
+                }
             }
         }
+    };
+
+
+    /**
+     * Broadcast global message
+     * @param {object} messageData содержание сообщения
+     * @param {string} id идентефикатор сообщения
+     * @param {string} reciver получатель сообщения
+     * @param {string} recepient отправитель сообщения
+     */
+    this.broadcastMessage = function (messageData, id, reciver, recepient) {
+        let message = {
+            type: MessageType.BROADCAST,
+            data: messageData,
+            reciver: reciver,
+            recepient: recepient,
+            id: id,
+            timestamp: (new Date().getTime()),
+            TTL: 0
+        };
+        that.broadcast(message);
     };
 
     /**
@@ -188,7 +247,7 @@ function Candy(nodeList) {
             callback(null, JSON.parse(data));
         };
         let message = BlockchainRequestors.queryAllMsg(blockId);
-        that.broadcastMessage(JSON.stringify(message));
+        that.broadcast(JSON.stringify(message));
     };
 
     return this;
