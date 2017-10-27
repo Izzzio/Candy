@@ -32,7 +32,7 @@ candy.onready = function () {
 
 ## Documentation
 
-**Created Candy object**
+**Creating Candy object**
 
 ```javascript
 var nodeList = ['ws://127.0.0.1:6001'];
@@ -68,3 +68,14 @@ candy.loadResource(resourceId, function (err, data) {
 ```
 
 * loadResource method loading resource from blockchain by resource id. At the moment resourceId is the index of the block which contain resource data.
+
+**Sending broadcast messages**
+
+```javascript
+candy.broadcastMessage(messageData, id, reciver, recepient);
+```
+
+* messageData - data for broadcasting
+* id - message id, used only by reciver
+* reciver - reciver string. Uses as destination adress
+* recepient - sender "reciver" string. For backward messaging

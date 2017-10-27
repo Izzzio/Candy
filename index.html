@@ -2,9 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Candy</title>
+    <title>Candy - Vitamin Blockchain driven Web Applications</title>
+
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #0f0f0f;
+            text-align: center;
+            color: white;
+        }
+    </style>
 </head>
 <body>
+
+<div style="text-align: center" id="markdownPlaceholder">
+    <img src="logo.png">
+</div>
+<div style="display: none">
+    Vitamin blockchain connection provider for browsers
+    Candy provides connection with Vitamin blockchain platform based on WebSocket protocol.
+    Candy can load binary and text resources from blockchain. For example: Images, CSS, Scripts, Sounds and other data.
+
+    By connecting to the blockchain, data is downloaded from the peer-to-peer network, reducing server overloading. By the way, you can completely upload site to the blockchain and load only proxy HTTP<->Vitamin page.
+</div>
+
+<script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+<script src="https://cdn.rawgit.com/showdownjs/showdown/1.8.0/dist/showdown.min.js"></script>
+<script>
+    $.get('/Candy/README.MD', function (data) {
+        alert(data);
+        var converter = new showdown.Converter();
+        $('#markdownPlaceholder').html(converter.makeHtml(data));
+    });
+
+</script>
 
 </body>
 </html>
