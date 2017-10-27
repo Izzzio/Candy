@@ -23,7 +23,8 @@
     Candy provides connection with Vitamin blockchain platform based on WebSocket protocol.
     Candy can load binary and text resources from blockchain. For example: Images, CSS, Scripts, Sounds and other data.
 
-    By connecting to the blockchain, data is downloaded from the peer-to-peer network, reducing server overloading. By the way, you can completely upload site to the blockchain and load only proxy HTTP<->Vitamin page.
+    By connecting to the blockchain, data is downloaded from the peer-to-peer network, reducing server overloading. By
+    the way, you can completely upload site to the blockchain and load only proxy HTTP<->Vitamin page.
 </div>
 
 <script
@@ -32,12 +33,13 @@
         crossorigin="anonymous"></script>
 <script src="https://cdn.rawgit.com/showdownjs/showdown/1.8.0/dist/showdown.min.js"></script>
 <script>
-    $.get('/Candy/README.MD', function (data) {
-        alert(data);
-        var converter = new showdown.Converter();
-        $('#markdownPlaceholder').html(converter.makeHtml(data));
+    $(document).ready(function () {
+        $.get('/Candy/README.MD', function (data) {
+            alert(data);
+            var converter = new showdown.Converter();
+            $('#markdownPlaceholder').html(converter.makeHtml(data));
+        });
     });
-
 </script>
 
 </body>
