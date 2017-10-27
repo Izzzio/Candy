@@ -15,8 +15,11 @@
 </head>
 <body>
 
-<div style="text-align: center" id="markdownPlaceholder">
-    <img src="logo.png">
+<div id="markdownPlaceholder">
+    <div style="text-align: center">
+        <img src="logo.png">
+    </div>
+
 </div>
 <div style="display: none">
     Vitamin blockchain connection provider for browsers
@@ -35,7 +38,6 @@
 <script>
     $(document).ready(function () {
         $.get('/Candy/README.MD', function (data) {
-            alert(data);
             var converter = new showdown.Converter();
             $('#markdownPlaceholder').html(converter.makeHtml(data));
         });
