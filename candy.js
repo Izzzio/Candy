@@ -32,6 +32,7 @@ function Candy(nodeList) {
     this._lastMsgTimestamp = 0;
     this._lastMsgIndex = 0;
     this._requestQueue = {};
+    this._autoloader = undefined;
 
     this.getid = () => (Math.random() * (new Date().getTime())).toString(36).replace(/[^a-z]+/g, '');
 
@@ -63,6 +64,7 @@ function Candy(nodeList) {
     this.onmessage = function (message) {
 
     };
+
 
     /**
      * Internal data handler
@@ -166,6 +168,9 @@ function Candy(nodeList) {
         socket.onopen = function () {
             setTimeout(function () {
                 if(typeof that.onready !== 'undefined') {
+                    if(typeof  that._autoloader !== 'undefined') {
+                        that._autoloader.onready();
+                    }
                     that.onready();
                     that.onready = undefined;
                 }
@@ -305,7 +310,7 @@ function Candy(nodeList) {
         if(typeof that._requestQueue[message.data.backId] !== 'undefined') {
             let request = that._requestQueue[message.data.backId];
             clearTimeout(request.timer);
-            request.callback(null, message.data.data);
+            request.callback(message.err, typeof message.data.data.body !== 'undefined' ? message.data.data.body : message.data.data, message);
             that._requestQueue[message.data.backId] = undefined;
         }
     };
@@ -357,7 +362,9 @@ function Candy(nodeList) {
         let url = document.createElement('a');
         url.href = uri.replace('candy:', 'http:');
         if(url.hostname === 'block') {
-            that.loadResource(url.pathname.replace('/', ''), callback);
+            that.loadResource(url.pathname.replace('/', ''), function (err, data) {
+                callback(err, data.candyData, data);
+            });
         } else {
             that.requestApp(uri, data, callback, timeout);
         }

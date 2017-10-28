@@ -25,16 +25,19 @@
         integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
         crossorigin="anonymous"></script>
 <script src="candy.js"></script>
+<script src="candy-autoloader.js"></script>
 <script>
     var candy = new Candy(['ws://node4.bitcoen.io:6001', 'wss://127.0.0.1:6001', 'ws://127.0.0.1:6001']).start();
+    var candyAutoloader = new CandyAutoloader(candy);
+
     candy.onready = function () {
         candy.loadResource(432, function (err, data) {
             document.getElementById('demoImage').src = data.candyData;
         });
 
-        candy.request('http://php/helloworld.php?a=123&b=321&z=123321', {a: 123}, function (err, data) {
+        candy.request('candy://php/helloworld.php?get=parameter&inquery=string&z=123321', {structured: 'data','in':'JSON'}, function (err, data) {
             if(!err) {
-                $('#phpRes').html(data.body);
+                $('#phpRes').html(data);
             } else {
                 console.log(err);
             }
@@ -44,10 +47,6 @@
     candy.onmessage = function (message) {
         alert('Message recived: ' + JSON.stringify(message));
     };
-
-    /*candy._candyAppResponse = function (message) {
-        $('#phpRes').html(message.data.data.body);
-    };*/
 
 
 </script>
