@@ -27,6 +27,7 @@ function Candy(nodeList) {
     this.blockHeight = 0;
     this.resourceQueue = {};
     this.lastMsgTimestamp = 0;
+    this.lastMsgIndex = 0;
 
     /**
      * Current reciever address. Override allowed
@@ -86,7 +87,6 @@ function Candy(nodeList) {
                         that.resourceQueue[block.index](block.data);
                         that.resourceQueue[block.index] = undefined;
                     }
-                    console.log(block);
                 }
 
             } catch (e) {
@@ -109,19 +109,22 @@ function Candy(nodeList) {
         }
 
         if(data.type === MessageType.BROADCAST) {
-            if(data.reciver === that.recieverAddress && that.lastMsgTimestamp < data.timestamp) {
-                that.lastMsgTimestamp = data.timestamp;
-                if(typeof that.onmessage === 'function') {
-                    if(that.onmessage(data)) {
-                        return;
+            if(that.lastMsgIndex < data.index) {
+                if(data.reciver === that.recieverAddress) {
+                    if(typeof that.onmessage === 'function') {
+                        if(that.onmessage(data)) {
+                            return;
+                        }
+                    }
+                } else {
+                    if(data.recepient !== that.recieverAddress) {
+                        data.TTL++;
+                        that.broadcast(data);
                     }
                 }
-            } else {
-                if(data.recepient !== that.recieverAddress) {
-                    data.TTL++;
-                    that.broadcast(data);
-                }
             }
+            that.lastMsgIndex = data.index;
+            that.lastMsgTimestamp = data.timestamp;
         }
     };
 
@@ -186,6 +189,7 @@ function Candy(nodeList) {
      * @param {string} recepient отправитель сообщения
      */
     this.broadcastMessage = function (messageData, id, reciver, recepient) {
+        that.lastMsgIndex++;
         let message = {
             type: MessageType.BROADCAST,
             data: messageData,
@@ -193,7 +197,8 @@ function Candy(nodeList) {
             recepient: recepient,
             id: id,
             timestamp: (new Date().getTime()),
-            TTL: 0
+            TTL: 0,
+            index: that.lastMsgIndex
         };
         that.broadcast(message);
     };
