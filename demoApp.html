@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Candy Demo - Vitamin Blockchain driven Web Application</title>
+
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+
+<div id="phpRes">
+    <div style="text-align: center">
+        <img src="logo.png">
+    </div>
+</div>
+
+
+<script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+<script src="candy.js"></script>
+<script>
+    var candy = new Candy(['ws://node4.bitcoen.io:6001', 'wss://127.0.0.1:6001', 'ws://127.0.0.1:6001']).start();
+    candy.onready = function () {
+        candy.loadResource(432, function (err, data) {
+            document.getElementById('demoImage').src = data.candyData;
+        });
+
+        candy.request('http://php/helloworld.php?a=123&b=321&z=123321', {a: 123}, function (err, data) {
+            if(!err) {
+                $('#phpRes').html(data.body);
+            } else {
+                console.log(err);
+            }
+        });
+    };
+
+    candy.onmessage = function (message) {
+        alert('Message recived: ' + JSON.stringify(message));
+    };
+
+    /*candy._candyAppResponse = function (message) {
+        $('#phpRes').html(message.data.data.body);
+    };*/
+
+
+</script>
+</body>
+</html>

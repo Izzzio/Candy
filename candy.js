@@ -4,6 +4,8 @@
  * @Author: Andrey Nedobylsky
  */
 
+'use strict';
+
 const MessageType = {
     QUERY_LATEST: 0,
     QUERY_ALL: 1,
@@ -19,21 +21,25 @@ const BlockchainRequestors = {
 };
 
 function Candy(nodeList) {
+    'use strict';
     let that = this;
     this.maxConnections = 30;
     this.nodeList = nodeList;
     this.connections = 0;
     this.sockets = [];
     this.blockHeight = 0;
-    this.resourceQueue = {};
-    this.lastMsgTimestamp = 0;
-    this.lastMsgIndex = 0;
+    this._resourceQueue = {};
+    this._lastMsgTimestamp = 0;
+    this._lastMsgIndex = 0;
+    this._requestQueue = {};
+
+    this.getid = () => (Math.random() * (new Date().getTime())).toString(36).replace(/[^a-z]+/g, '');
 
     /**
      * Current reciever address. Override allowed
      * @type {string}
      */
-    this.recieverAddress = (Math.random() * (new Date().getTime())).toString(36).replace(/[^a-z]+/g, '');
+    this.recieverAddress = this.getid() + this.getid();
 
     /**
      * On data recived callback
@@ -63,7 +69,7 @@ function Candy(nodeList) {
      * @param {WebSocket} source
      * @param {Object} data
      */
-    this.dataRecieved = function (source, data) {
+    this._dataRecieved = function (source, data) {
         if(typeof that.ondata === 'function') {
             if(that.ondata(data)) {
                 return;
@@ -83,9 +89,9 @@ function Candy(nodeList) {
                         that.blockHeight = block.index
                     }
                     //Loading requested resource
-                    if(typeof that.resourceQueue[block.index] !== 'undefined') {
-                        that.resourceQueue[block.index](block.data);
-                        that.resourceQueue[block.index] = undefined;
+                    if(typeof that._resourceQueue[block.index] !== 'undefined') {
+                        that._resourceQueue[block.index](block.data);
+                        that._resourceQueue[block.index] = undefined;
                     }
                 }
 
@@ -109,11 +115,16 @@ function Candy(nodeList) {
         }
 
         if(data.type === MessageType.BROADCAST) {
-            if(that.lastMsgIndex < data.index) {
+            if(that._lastMsgIndex < data.index) {
                 if(data.reciver === that.recieverAddress) {
-                    if(typeof that.onmessage === 'function') {
-                        if(that.onmessage(data)) {
-                            return;
+
+                    if(data.id === 'CANDY_APP_RESPONSE') {
+                        if(typeof that._candyAppResponse === 'function') {
+                            that._candyAppResponse(data);
+                        }
+                    } else {
+                        if(typeof that.onmessage === 'function') {
+                            that.onmessage(data);
                         }
                     }
                 } else {
@@ -123,8 +134,8 @@ function Candy(nodeList) {
                     }
                 }
             }
-            that.lastMsgIndex = data.index;
-            that.lastMsgTimestamp = data.timestamp;
+            that._lastMsgIndex = data.index;
+            that._lastMsgTimestamp = data.timestamp;
         }
     };
 
@@ -153,10 +164,12 @@ function Candy(nodeList) {
     this.connectPeer = function (peer) {
         let socket = new WebSocket(peer);
         socket.onopen = function () {
-            if(typeof that.onready !== 'undefined') {
-                that.onready();
-                that.onready = undefined;
-            }
+            setTimeout(function () {
+                if(typeof that.onready !== 'undefined') {
+                    that.onready();
+                    that.onready = undefined;
+                }
+            }, 10);
         };
 
         socket.onclose = function (event) {
@@ -167,7 +180,7 @@ function Candy(nodeList) {
         socket.onmessage = function (event) {
             try {
                 let data = JSON.parse(event.data);
-                that.dataRecieved(socket, data);
+                that._dataRecieved(socket, data);
             } catch (e) {
             }
         };
@@ -210,7 +223,7 @@ function Candy(nodeList) {
      * @param {string} recepient отправитель сообщения
      */
     this.broadcastMessage = function (messageData, id, reciver, recepient) {
-        that.lastMsgIndex++;
+        that._lastMsgIndex++;
         let message = {
             type: MessageType.BROADCAST,
             data: messageData,
@@ -219,7 +232,7 @@ function Candy(nodeList) {
             id: id,
             timestamp: (new Date().getTime()),
             TTL: 0,
-            index: that.lastMsgIndex
+            index: that._lastMsgIndex
         };
         if(!that.broadcast(message)) {
             that.autoconnect(true);
@@ -267,6 +280,91 @@ function Candy(nodeList) {
     };
 
     /**
+     * Makes RAW Candy Server Application request
+     * @param reciver
+     * @param uri
+     * @param requestData
+     * @param {string} backId
+     */
+    this._candyAppRequest = function (uri, requestData, backId) {
+        let url = document.createElement('a');
+        url.href = uri.replace('candy:', 'http:');
+        let data = {
+            uri: uri,
+            data: requestData,
+            backId: backId
+        };
+        this.broadcastMessage(data, 'CANDY_APP', url.host, that.recieverAddress);
+    };
+
+    /**
+     * Response from Candy Server App
+     * @param message
+     */
+    this._candyAppResponse = function (message) {
+        if(typeof that._requestQueue[message.data.backId] !== 'undefined') {
+            let request = that._requestQueue[message.data.backId];
+            clearTimeout(request.timer);
+            request.callback(null, message.data.data);
+            that._requestQueue[message.data.backId] = undefined;
+        }
+    };
+
+
+    /**
+     * Creates request to app like $.ajax request
+     * @param {string} uri
+     * @param {object} data
+     * @param {function} callback
+     * @param {int} timeout
+     */
+    this.requestApp = function (uri, data, callback, timeout) {
+        if(typeof timeout === 'undefined') {
+            timeout = 10000;
+        }
+        let requestId = that.getid();
+
+        let timer = setTimeout(function () {
+            that._requestQueue[requestId].callback({error: 'Timeout', request: that._requestQueue[requestId]});
+            that._requestQueue[requestId] = undefined;
+        }, timeout);
+
+        that._requestQueue[requestId] = {
+            id: requestId,
+            uri: uri,
+            data: data,
+            timeout: timeout,
+            callback: callback,
+            timer: timer
+        };
+
+        that._candyAppRequest(uri, data, requestId);
+
+        return that._requestQueue[requestId];
+    };
+
+    /**
+     * Universal request function.
+     * For request data from vitamin chain use "block" as host name and bock id as path. Ex: candy://block/14
+     * For application request use candy://hostname/filepath?get=query
+     * Data and timeout ignored in block request
+     * @param {string} uri
+     * @param {object} data
+     * @param {function} callback
+     * @param {int} timeout
+     */
+    this.request = function (uri, data, callback, timeout) {
+        let url = document.createElement('a');
+        url.href = uri.replace('candy:', 'http:');
+        if(url.hostname === 'block') {
+            that.loadResource(url.pathname.replace('/', ''), callback);
+        } else {
+            that.requestApp(uri, data, callback, timeout);
+        }
+    };
+
+
+    /**
      * Load resource from blockchain
      * @param {Number} blockId
      * @param {Function} callback
@@ -275,7 +373,7 @@ function Candy(nodeList) {
         if(blockId > that.blockHeigth && blockId < 1) {
             callback(404);
         }
-        that.resourceQueue[blockId] = function (data) {
+        that._resourceQueue[blockId] = function (data) {
             callback(null, JSON.parse(data));
         };
         let message = BlockchainRequestors.queryAllMsg(blockId);
