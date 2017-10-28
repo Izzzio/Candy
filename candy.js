@@ -99,7 +99,7 @@ function Candy(nodeList) {
                 if(data.data.hasOwnProperty(a)) {
                     if(that.nodeList.indexOf(data.data[a]) == -1) {
                         that.nodeList.push(data.data[a]);
-                        if(that.connections < that.maxConnections - 1) {
+                        if(that.getActiveConnections().length < that.maxConnections - 1) {
                             that.connectPeer(data.data[a]);
                         }
                     }
@@ -128,6 +128,24 @@ function Candy(nodeList) {
         }
     };
 
+
+    /**
+     * Returns array of connected sockets
+     * @return {Array}
+     */
+    that.getActiveConnections = function () {
+        let activeSockets = [];
+        for (let a in that.sockets) {
+            if(that.sockets[a]) {
+                if(that.sockets[a].readyState === WebSocket.OPEN) {
+                    activeSockets.push(that.sockets[a]);
+                }
+            }
+        }
+
+        return activeSockets;
+    };
+
     /**
      * Inits peer connection
      * @param {String} peer
@@ -135,7 +153,6 @@ function Candy(nodeList) {
     this.connectPeer = function (peer) {
         let socket = new WebSocket(peer);
         socket.onopen = function () {
-            that.connections++;
             if(typeof that.onready !== 'undefined') {
                 that.onready();
                 that.onready = undefined;
@@ -143,7 +160,6 @@ function Candy(nodeList) {
         };
 
         socket.onclose = function (event) {
-            that.connections--;
             that.sockets[that.sockets.indexOf(socket)] = null;
             delete that.sockets[that.sockets.indexOf(socket)];
         };
@@ -165,8 +181,10 @@ function Candy(nodeList) {
     /**
      * Broadcast message to peers
      * @param message
+     * @return {boolean} sending status
      */
     this.broadcast = function (message) {
+        let sended = false;
         if(typeof message !== 'string') {
             message = JSON.stringify(message);
         }
@@ -174,10 +192,13 @@ function Candy(nodeList) {
             if(that.sockets.hasOwnProperty(a) && that.sockets[a] !== null) {
                 try {
                     that.sockets[a].send(message);
+                    sended = true;
                 } catch (e) {
                 }
             }
         }
+
+        return sended;
     };
 
 
@@ -200,24 +221,30 @@ function Candy(nodeList) {
             TTL: 0,
             index: that.lastMsgIndex
         };
-        that.broadcast(message);
+        if(!that.broadcast(message)) {
+            that.autoconnect(true);
+            return false;
+        }
+
+        return true;
     };
 
     /**
      * Reconnecting peers if fully disconnected
+     * @param {boolean} force reconnection
      */
-    this.autoconnect = function () {
-        if(that.connections < 1 || that.sockets[that.sockets.length - 1] === null) {
+    this.autoconnect = function (force) {
+        if((that.getActiveConnections().length < 1 || that.sockets[that.sockets.length - 1] === null) || force) {
             for (let a in that.nodeList) {
                 if(that.nodeList.hasOwnProperty(a)) {
-                    if(that.connections < that.maxConnections - 1) {
+                    if(that.getActiveConnections().length < that.maxConnections - 1) {
                         that.connectPeer(that.nodeList[a]);
                     }
                 }
             }
         } else {
             that.sockets = Array.from(new Set(that.sockets));
-            that.connections = that.sockets.length;
+            that.connections = that.getActiveConnections().length;
         }
     };
 
@@ -227,7 +254,7 @@ function Candy(nodeList) {
     this.start = function () {
         for (let a in that.nodeList) {
             if(that.nodeList.hasOwnProperty(a)) {
-                if(that.connections < that.maxConnections - 1) {
+                if(that.getActiveConnections().length < that.maxConnections - 1) {
                     that.connectPeer(that.nodeList[a]);
                 }
             }
