@@ -1,6 +1,8 @@
 ![Candy logo](https://github.com/VitaminBlockchain/Candy/raw/master/logo.png)
 
-# Candy
+# [Candy](https://github.com/VitaminBlockchain/Candy/fork)
+[GtiHub](https://github.com/VitaminBlockchain/Candy/fork)
+
 **Vitamin blockchain connection provider for browsers**
 
 #### Summary
@@ -150,7 +152,7 @@ Also you can use block format url for loading resources
 
 ## Contributing
 
-1. Fork it ( https://github.com/VitaminBlockchain/Candy/fork )
+1. Fork it ( [https://github.com/VitaminBlockchain/Candy/fork](https://github.com/VitaminBlockchain/Candy/fork) )
 2. Create your feature branch (git checkout -b my-new-feature)
 3. Commit your changes (git commit -am 'Add some feature')
 4. Push to the branch (git push origin my-new-feature)
