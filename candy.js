@@ -92,7 +92,7 @@ function Candy(nodeList) {
                     }
                     //Loading requested resource
                     if(typeof that._resourceQueue[block.index] !== 'undefined') {
-                        that._resourceQueue[block.index](block.data);
+                        that._resourceQueue[block.index](block.data, block);
                         that._resourceQueue[block.index] = undefined;
                     }
                 }
