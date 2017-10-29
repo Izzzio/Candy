@@ -252,7 +252,7 @@ function Candy(nodeList) {
      * @param {boolean} force reconnection
      */
     this.autoconnect = function (force) {
-        if(that.getActiveConnections().length < 1  || force) {
+        if(that.getActiveConnections().length < 1 || force) {
             for (let a in that.nodeList) {
                 if(that.nodeList.hasOwnProperty(a)) {
                     if(that.getActiveConnections().length < that.maxConnections - 1) {
@@ -380,8 +380,8 @@ function Candy(nodeList) {
         if(blockId > that.blockHeigth && blockId < 1) {
             callback(404);
         }
-        that._resourceQueue[blockId] = function (data) {
-            callback(null, JSON.parse(data));
+        that._resourceQueue[blockId] = function (data, rawBlock) {
+            callback(null, JSON.parse(data), rawBlock);
         };
         let message = BlockchainRequestors.queryAllMsg(blockId);
         that.broadcast(JSON.stringify(message));
