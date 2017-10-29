@@ -252,7 +252,7 @@ function Candy(nodeList) {
      * @param {boolean} force reconnection
      */
     this.autoconnect = function (force) {
-        if((that.getActiveConnections().length < 1 || that.sockets[that.sockets.length - 1] === null) || force) {
+        if(that.getActiveConnections().length < 1  || force) {
             for (let a in that.nodeList) {
                 if(that.nodeList.hasOwnProperty(a)) {
                     if(that.getActiveConnections().length < that.maxConnections - 1) {

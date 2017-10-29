@@ -27,7 +27,7 @@
 <script src="candy.js"></script>
 <script src="candy-autoloader.js"></script>
 <script>
-    var candy = new Candy(['ws://node4.bitcoen.io:6001', 'wss://127.0.0.1:6001', 'ws://127.0.0.1:6001']).start();
+    var candy = new Candy(['ws://twister-vl.ru:6001', 'ws://localhost:6001']).start();
     var candyAutoloader = new CandyAutoloader(candy);
 
     candy.onready = function () {
@@ -35,7 +35,10 @@
             document.getElementById('demoImage').src = data.candyData;
         });
 
-        candy.request('candy://php/helloworld.php?get=parameter&inquery=string&z=123321', {structured: 'data','in':'JSON'}, function (err, data) {
+        candy.request('candy://php/helloworld.php?get=parameter&inquery=string&z=123321', {
+            structured: 'data',
+            'in': 'JSON'
+        }, function (err, data) {
             if(!err) {
                 $('#phpRes').html(data);
             } else {
