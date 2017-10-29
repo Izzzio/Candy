@@ -1,7 +1,7 @@
 ![Candy logo](https://github.com/VitaminBlockchain/Candy/raw/master/logo.png)
 
-# [Candy](https://github.com/VitaminBlockchain/Candy/fork)
-[GtiHub](https://github.com/VitaminBlockchain/Candy/fork)
+# [Candy](https://github.com/VitaminBlockchain/Candy)
+[GtiHub](https://github.com/VitaminBlockchain/Candy)
 
 **Vitamin blockchain connection provider for browsers**
 
