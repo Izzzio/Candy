@@ -4,10 +4,10 @@
 [GtiHub](https://github.com/VitaminBlockchain/Candy)
 
 ![ES6](https://img.shields.io/badge/es-6-brightgreen.svg)
-[![GitHub contributors](https://img.shields.io/github/contributors/VitaminBlockchain/Candy.svg)]()
-[![GitHub last commit](https://img.shields.io/github/last-commit/VitaminBlockchain/Candy.svg)]()
-[![Github search hit counter](https://img.shields.io/github/search/VitaminBlockchain/Candy/goto.svg)]()
-[![GitHub top language](https://img.shields.io/github/languages/top/VitaminBlockchain/Candy.svg)]()
+![GitHub contributors](https://img.shields.io/github/contributors/VitaminBlockchain/Candy.svg)
+![GitHub last commit](https://img.shields.io/github/last-commit/VitaminBlockchain/Candy.svg)
+![Github search hit counter](https://img.shields.io/github/search/VitaminBlockchain/Candy/goto.svg)
+![GitHub top language](https://img.shields.io/github/languages/top/VitaminBlockchain/Candy.svg)
 
 **Vitamin blockchain connection provider for browsers**
 
