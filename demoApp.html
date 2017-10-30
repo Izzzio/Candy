@@ -27,7 +27,7 @@
 <script src="candy.js"></script>
 <script src="candy-autoloader.js"></script>
 <script>
-    var candy = new Candy(['ws://twister-vl.ru:6001', 'ws://localhost:6001', 'wss://xn--90absg.xn--p1ai/vitamin/']).start();
+    var candy = new Candy(['wss://xn--90absg.xn--p1ai/vitamin/', 'ws://twister-vl.ru:6001', 'ws://localhost:6001']).start();
     var candyAutoloader = new CandyAutoloader(candy);
 
     candy.onready = function () {
