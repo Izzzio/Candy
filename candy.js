@@ -15,8 +15,9 @@ const MessageType = {
 };
 
 const BlockchainRequestors = {
-    queryAllMsg: function (fromIndex) {
-        return {'type': MessageType.QUERY_ALL, data: typeof fromIndex === 'undefined' ? 0 : fromIndex}
+    queryAllMsg: function (fromIndex, limit) {
+        limit = typeof limit === 'undefined' ? 1 : limit;
+        return {'type': MessageType.QUERY_ALL, data: typeof fromIndex === 'undefined' ? 0 : fromIndex, limit: limit}
     }
 };
 
