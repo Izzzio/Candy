@@ -165,7 +165,12 @@ function Candy(nodeList) {
      * @param {String} peer
      */
     this.connectPeer = function (peer) {
-        let socket = new WebSocket(peer);
+        let socket = null;
+        try {
+            socket = new WebSocket(peer);
+        }catch (e){
+            return;
+        }
         socket.onopen = function () {
             setTimeout(function () {
                 if(typeof that.onready !== 'undefined') {
