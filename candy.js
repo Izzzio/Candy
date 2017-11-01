@@ -118,7 +118,7 @@ function Candy(nodeList) {
         }
 
         if(data.type === MessageType.BROADCAST) {
-            if(that._lastMsgIndex < data.index) {
+            /*if(that._lastMsgIndex < data.index) {*/
                 if(data.reciver === that.recieverAddress) {
 
                     if(data.id === 'CANDY_APP_RESPONSE') {
@@ -136,7 +136,7 @@ function Candy(nodeList) {
                         that.broadcast(data);
                     }
                 }
-            }
+            /*}*/
             that._lastMsgIndex = data.index;
             that._lastMsgTimestamp = data.timestamp;
         }
