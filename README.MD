@@ -1,22 +1,22 @@
-![Candy logo](https://github.com/VitaminBlockchain/Candy/raw/master/logo.png)
+![Candy logo](https://github.com/izzzio/Candy/raw/master/logo.png)
 
-# [Candy](https://github.com/VitaminBlockchain/Candy)
-[GtiHub](https://github.com/VitaminBlockchain/Candy)
+# [Candy](https://github.com/izzzio/Candy)
+[GtiHub](https://github.com/izzzio/Candy)
 
 ![ES6](https://img.shields.io/badge/es-6-brightgreen.svg)
-![GitHub contributors](https://img.shields.io/github/contributors/VitaminBlockchain/Candy.svg)
-![GitHub last commit](https://img.shields.io/github/last-commit/VitaminBlockchain/Candy.svg)
-![Github search hit counter](https://img.shields.io/github/search/VitaminBlockchain/Candy/goto.svg)
-![GitHub top language](https://img.shields.io/github/languages/top/VitaminBlockchain/Candy.svg)
+![GitHub contributors](https://img.shields.io/github/contributors/izzzio/Candy.svg)
+![GitHub last commit](https://img.shields.io/github/last-commit/izzzio/Candy.svg)
+![Github search hit counter](https://img.shields.io/github/search/izzzio/Candy/goto.svg)
+![GitHub top language](https://img.shields.io/github/languages/top/izzzio/Candy.svg)
 
-**Vitamin blockchain connection provider for browsers**
+**iZ³ blockchain connection provider for browsers**
 
 #### Summary
 
-Candy provides connection with Vitamin blockchain platform based on WebSocket protocol.
+Candy provides connection with iZ³ blockchain platform based on WebSocket protocol.
 Candy can load binary and text resources from blockchain. For example: Images, CSS, Scripts, Sounds and other data. 
 
-By connecting to the blockchain, data is downloaded from the peer-to-peer network, reducing server overloading. By the way, you can completely upload site to the blockchain and load only proxy HTTP<->Vitamin page.
+By connecting to the blockchain, data is downloaded from the peer-to-peer network, reducing server overloading. By the way, you can completely upload site to the blockchain and load only proxy HTTP<->iZ³ page.
 
 
 ## Example
@@ -47,7 +47,7 @@ var nodeList = ['ws://127.0.0.1:6001'];
 var candy = new Candy(nodeList);
 ```
 
-* nodeList - initial list of Vitamin nodes with protocol string ``ws://`` and port ``6001``
+* nodeList - initial list of iZ³ nodes with protocol string ``ws://`` and port ``6001``
 
 **Connection initialization and starting**
 
@@ -104,7 +104,7 @@ candy.broadcastMessage(messageData, id, reciver, recepient);
 **Candy Server Application requests**
 
 Candy Server App (CSA) - is a Node.js or CGI application running on decided server.
-CSA use Vitamin blockchain as communication level. Request to Candy Application very similar to jQuery ajax request.
+CSA use iZ³ blockchain as communication level. Request to Candy Application very similar to jQuery ajax request.
 
 **request** method provide simple interface for requesting CSA. I'ts uses special candy url syntax:
 
@@ -158,7 +158,7 @@ Also you can use block format url for loading resources
 
 ## Contributing
 
-1. Fork it ( [https://github.com/VitaminBlockchain/Candy/fork](https://github.com/VitaminBlockchain/Candy/fork) )
+1. Fork it ( [https://github.com/izzzio/Candy/fork](https://github.com/izzzio/Candy/fork) )
 2. Create your feature branch (git checkout -b my-new-feature)
 3. Commit your changes (git commit -am 'Add some feature')
 4. Push to the branch (git push origin my-new-feature)

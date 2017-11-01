@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Candy - Vitamin Blockchain driven Web Applications</title>
+    <title>Candy - iZ³ Blockchain driven Web Applications</title>
 
     <style>
         body {
@@ -58,13 +58,13 @@
 
     ES6 GitHub contributors GitHub last commit Github search hit counter GitHub top language
 
-    Vitamin blockchain connection provider for browsers
+    iZ³ blockchain connection provider for browsers
 
     Summary
 
-    Candy provides connection with Vitamin blockchain platform based on WebSocket protocol. Candy can load binary and text resources from blockchain. For example: Images, CSS, Scripts, Sounds and other data.
+    Candy provides connection with iZ³ Izzzio Izzz blockchain platform based on WebSocket protocol. Candy can load binary and text resources from blockchain. For example: Images, CSS, Scripts, Sounds and other data.
 
-    By connecting to the blockchain, data is downloaded from the peer-to-peer network, reducing server overloading. By the way, you can completely upload site to the blockchain and load only proxy HTTP<->Vitamin page.
+    By connecting to the blockchain, data is downloaded from the peer-to-peer network, reducing server overloading. By the way, you can completely upload site to the blockchain and load only proxy HTTP<->iZ³ page.
 
     Example
 
@@ -85,7 +85,7 @@
 
     var nodeList = ['ws://127.0.0.1:6001'];
     var candy = new Candy(nodeList);
-    nodeList - initial list of Vitamin nodes with protocol string ws:// and port 6001
+    nodeList - initial list of iZ³ nodes with protocol string ws:// and port 6001
     Connection initialization and starting
 
     candy.start();
@@ -122,7 +122,7 @@
     recepient - sender "reciver" string. For backward messaging
     Candy Server Application requests
 
-    Candy Server App (CSA) - is a Node.js or CGI application running on decided server. CSA use Vitamin blockchain as communication level. Request to Candy Application very similar to jQuery ajax request.
+    Candy Server App (CSA) - is a Node.js or CGI application running on decided server. CSA use iZ³ blockchain as communication level. Request to Candy Application very similar to jQuery ajax request.
 
     request method provide simple interface for requesting CSA. I'ts uses special candy url syntax:
 
@@ -163,7 +163,7 @@
 
     Contributing
 
-    Fork it ( https://github.com/VitaminBlockchain/Candy/fork )
+    Fork it ( https://github.com/izzzio/Candy/fork )
     Create your feature branch (git checkout -b my-new-feature)
     Commit your changes (git commit -am 'Add some feature')
     Push to the branch (git push origin my-new-feature)
@@ -186,7 +186,7 @@
             showdown.setFlavor('github');
             var converter = new showdown.Converter({extensions: ['prettify']});
             $('#markdownPlaceholder').html(converter.makeHtml(data));
-            $('img').parent().addClass('center');
+            $($('img')[0]).parent().addClass('center');
             PR.prettyPrint();
         });
     });

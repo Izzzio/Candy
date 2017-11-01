@@ -1,6 +1,6 @@
 /**
  * Candy autoloader
- * Autoloads resources from Vitamin blokchain
+ * Autoloads resources from iZ³ blokchain
  * @Author: Andrey Nedobylsky
  */
 
