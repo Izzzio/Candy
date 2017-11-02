@@ -318,6 +318,7 @@ function Candy(nodeList) {
             clearTimeout(request.timer);
             request.callback(message.err, typeof message.data.data.body !== 'undefined' ? message.data.data.body : message.data.data, message);
             that._requestQueue[message.data.backId] = undefined;
+            delete that._requestQueue[message.data.backId];
         }
     };
 
