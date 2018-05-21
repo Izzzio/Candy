@@ -28,9 +28,9 @@
 
 <script src="candy.js"></script>
 <script>
-    var candy = new Candy(['ws://node4.bitcoen.io:6001', 'wss://127.0.0.1:6001', 'ws://127.0.0.1:6001']).start();
+    var candy = new Candy(['ws://testnode.izzz.io:6001', 'ws://127.0.0.1:6001']).start();
     candy.onready = function () {
-        candy.request('candy://block/432', null, function (err, data) {
+        candy.request('candy://block/5', null, function (err, data) {
             document.getElementById('demoImage').src = data;
         });
     };
