@@ -30,7 +30,7 @@
 <script>
     var candy = new Candy(['ws://testnode.izzz.io:6001','wss://izzz.io/blockchain/', 'ws://127.0.0.1:6001']).start();
     candy.onready = function () {
-        candy.request('candy://block/5', null, function (err, data) {
+        candy.request('candy://block/14', null, function (err, data) {
             document.getElementById('demoImage').src = data;
         });
     };
