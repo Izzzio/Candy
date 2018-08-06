@@ -19,10 +19,7 @@ function DigitalSignature(dataToSign) { //data in string format
      * Sign
      */
 	this.sign = '';
-	/**
-     * Sign algorithm
-     */
-	this.sigAlg = 'SHA256withRSA';
+	
 	/**
      * data format as presented in 'block data'
      */
