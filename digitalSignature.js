@@ -19,7 +19,7 @@ function DigitalSignature(dataToSign) { //data in string format
      * Sign
      */
 	this.sign = '';
-	
+    
 	/**
      * data format as presented in 'block data'
      */
@@ -41,6 +41,7 @@ function DigitalSignature(dataToSign) { //data in string format
             public: repairKey(fix(forge.pki.publicKeyToRSAPublicKeyPem(keypair.publicKey, 72))),
             private: repairKey(fix(forge.pki.privateKeyToPem(keypair.privateKey, 72)))
         };
+        this.keysPair = keypair;
         console.log('Info: Keypair generated');
         return keypair;
     };
@@ -88,13 +89,13 @@ function DigitalSignature(dataToSign) { //data in string format
 	 * @param {data} data for signing
 	 * @param {puBkey} private key
      */
-	this.verifyData = (data = this.signedData, sign = this.signedData.sign, key = this.keysPair.public) => {
+	this.verifyData = (data = this.signedData, sign = this.signedData.sign, key = this.signedData.pubkey) => {
 		if (typeof data === 'object'){
             sign = data.sign;
             data = data.data;
         };
         try {
-            let publicKey = forge.pki.publicKeyFromPem(key);
+            let publicKey = forge.pki.publicKeyFromPem(repairKey(fix(key)));
             let md = forge.md.sha256.create();
             md.update(data,'utf8');
 			return publicKey.verify(md.digest().bytes(), forge.util.hexToBytes(sign)); //verifying only in bytes format
