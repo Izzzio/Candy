@@ -4,6 +4,10 @@
  * @Author: Andrey Nedobylsky
  */
 
+/**
+ * required nodemetainfo
+ */
+
 'use strict';
 
 const MessageType = {
@@ -142,6 +146,21 @@ function Candy(nodeList) {
             that._lastMsgIndex = data.index;
             that._lastMsgTimestamp = data.timestamp;
         }
+        
+        //add meta info handling
+        if(data.type === MessageType.META){
+            try {
+                let ind = sockets.indexOf(source);
+                if(ind > -1) {
+                    sockets[ind].nodeMetaInfo = (new NodeMetaInfo()).parse(data.data);
+                } else {
+                    console.log('Error: Unexpected error occurred when trying to add validators');
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
     };
 
 
