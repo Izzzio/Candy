@@ -11,7 +11,9 @@ const MessageType = {
     QUERY_ALL: 1,
     RESPONSE_BLOCKCHAIN: 2,
     MY_PEERS: 3,
-    BROADCAST: 4
+    BROADCAST: 4,
+    META: 5,
+    SW_BROADCAST: 6
 };
 
 const BlockchainRequestors = {
