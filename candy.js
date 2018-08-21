@@ -41,6 +41,8 @@ function Candy(nodeList) {
     this._requestQueue = {};
     this._autoloader = undefined;
     this.getid = () => (Math.random() * (new Date().getTime())).toString(36).replace(/[^a-z]+/g, '');
+    this.messagesHandlers = [];
+    this.routes = {};
 
     /**
      * Current reciever address. Override allowed
@@ -146,7 +148,7 @@ function Candy(nodeList) {
             that._lastMsgTimestamp = data.timestamp;
         }
 
-        //add meta info handling
+        //add meta info handling //required NodeMetaInfo.js included
         if(data.type === MessageType.META){
             if (typeof NodeMetaInfo === 'function'){
                 let ind = that.sockets.indexOf(source);
@@ -159,6 +161,15 @@ function Candy(nodeList) {
                 console.log('Error: NodeMetaInfo.js has not been included');
             }
         }
+
+        if (data.type === MessageType.SW_BROADCAST){
+            if (typeof starwaveProtocol === 'function') {
+                let starwave = new starwaveProtocol(this, MessageType);
+                this._lastMsgIndex = starwave.handleMessage(message, messagesHandlers, ws);
+            }
+        }
+
+
 
     };
 
@@ -416,6 +427,16 @@ function Candy(nodeList) {
         let message = BlockchainRequestors.queryAllMsg(blockId);
         that.broadcast(JSON.stringify(message));
     };
+
+
+    /**
+     * Добавляет обработчик сообщения
+     * @param {string} id
+     * @param {Function} handler
+     */
+    this.registerMessageHandler = function (id, handler) {
+        this.messagesHandlers.push({id: id, handle: handler});
+    }
 
     return this;
 }
