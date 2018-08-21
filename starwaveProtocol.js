@@ -95,7 +95,7 @@ class starwaveProtocol {
                 this.handleMessage(message, this.candy.messagesHandlers, null);
                 return true;
             } else {
-                let socket = this.candy.getSocketByBusAddress(messageBusAddress);
+                let socket = this.getSocketByBusAddress(messageBusAddress);
 
                 if(!socket) {  //нет такого подключенного сокета
                     return false;
@@ -126,7 +126,7 @@ class starwaveProtocol {
             let prevSender; //отправитель сообщения
             if(message.route.length > 0) { //если массив маршрута пуст, значит, это первая отправка сообщения и рассылать нужно без ограничений
                 //сохраняем предыдущего отправителя(он записан последним в массиве маршрутов)
-                prevSender = that.candy.getSocketByBusAddress(message.route[message.route.length - 1]);
+                prevSender = that.getSocketByBusAddress(message.route[message.route.length - 1]);
             }
             //добавляем свой адрес в маршруты
             message.route.push(this.candy.recieverAddress);
@@ -289,7 +289,7 @@ class starwaveProtocol {
         try {
             ws.send(JSON.stringify(message))
         } catch (e) { //ошибка записи, возможно сокет уже не активен
-            console.log('Send error: ' + e + ' ' + ws._socket.remoteAddress)
+            console.log('Send error: ' + e );
         }
     }
 
@@ -335,12 +335,14 @@ class starwaveProtocol {
          * @param excludeIp
          */
     broadcast(message, excludeIp) {
-        sockets.forEach(function (socket) {
-            if(typeof excludeIp === 'undefined' || socket._socket.recieverAddress !== excludeIp) {
-                write(socket, message)
+        let i;
+        for (i = 0; i <= this.candy.sockets.length; i++){
+            let socket = this.candy.sockets[i];
+            if(typeof excludeIp === 'undefined' || socket !== excludeIp) {
+                this.write(socket, message)
             } else {
 
             }
-        });
+        }
     };
 }
