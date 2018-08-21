@@ -146,18 +146,18 @@ function Candy(nodeList) {
             that._lastMsgIndex = data.index;
             that._lastMsgTimestamp = data.timestamp;
         }
-        
+
         //add meta info handling
         if(data.type === MessageType.META){
-            try {
-                let ind = sockets.indexOf(source);
+            if (typeof NodeMetaInfo === 'function'){
+                let ind = that.sockets.indexOf(source);
                 if(ind > -1) {
-                    sockets[ind].nodeMetaInfo = (new NodeMetaInfo()).parse(data.data);
+                    that.sockets[ind].nodeMetaInfo = (new NodeMetaInfo()).parse(data.data);
                 } else {
                     console.log('Error: Unexpected error occurred when trying to add validators');
                 }
-            } catch (err) {
-                console.log(err);
+            } else {
+                console.log('Error: NodeMetaInfo.js has not been included');
             }
         }
 

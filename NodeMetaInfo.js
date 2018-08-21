@@ -10,7 +10,7 @@
 
 'use strict';
 
-function NodeMetaInfo(config) {
+let NodeMetaInfo = function NodeMetaInfo(config) {
 
     this.validators = config ? config.validators : [];
     this.modules = [];
@@ -26,7 +26,8 @@ function NodeMetaInfo(config) {
         if(typeof nodeMetaInfo==='string'){
             try {
                 nodeMetaInfo = JSON.parse(nodeMetaInfo);
-            }catch (e) {
+            } catch (e) {
+                console.log(e);
                 return this;
             }
         }
