@@ -22,21 +22,31 @@ let NodeMetaInfo = function NodeMetaInfo(config) {
      * @param {NodeMetaInfo} nodeMetaInfo
      * @return {NodeMetaInfo}
      */
-    this.parse = function(nodeMetaInfo){
+    this.parse = function (nodeMetaInfo){
+        let info = {};
         if(typeof nodeMetaInfo==='string'){
             try {
                 nodeMetaInfo = JSON.parse(nodeMetaInfo);
             } catch (e) {
                 console.log(e);
-                return this;
+                return info;
             }
         }
 
-        this.validators = nodeMetaInfo.validators;
-        this.modules = nodeMetaInfo.modules;
-        this.messageBusAddress = nodeMetaInfo.messageBusAddress;
+        if (nodeMetaInfo.hasOwnProperty('validators')){
+            info.validators = this.validators = nodeMetaInfo.validators;
+        }
+        if (nodeMetaInfo.hasOwnProperty('modules')) {
+            info.modules = this.modules = nodeMetaInfo.modules;
+        }
+        if (nodeMetaInfo.hasOwnProperty('versions')) {
+            info.versions = this.versions = nodeMetaInfo.versions;
+        }
+        if (nodeMetaInfo.hasOwnProperty('messageBusAddress')) {
+            info.messageBusAddress = this.messageBusAddress = nodeMetaInfo.messageBusAddress;
+        }
 
-        return this;
+        return info;
     }
 
 
