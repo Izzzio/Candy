@@ -40,7 +40,6 @@ function Candy(nodeList) {
     this._lastMsgIndex = 0;
     this._requestQueue = {};
     this._autoloader = undefined;
-
     this.getid = () => (Math.random() * (new Date().getTime())).toString(36).replace(/[^a-z]+/g, '');
 
     /**

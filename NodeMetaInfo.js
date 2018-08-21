@@ -10,43 +10,34 @@
 
 'use strict';
 
-let NodeMetaInfo = function NodeMetaInfo(config) {
-
-    this.validators = config ? config.validators : [];
-    this.modules = [];
-    this.versions = {};
-    this.messageBusAddress = config ? config.recieverAddress : '';
+class NodeMetaInfo {
+    constructor(config) {
+        this.validators = config ? config.validators : [];
+        this.modules = [];
+        this.versions = {};
+        this.messageBusAddress = config ? config.recieverAddress : '';
+    }
 
     /**
      * Parse input meta message
      * @param {NodeMetaInfo} nodeMetaInfo
      * @return {NodeMetaInfo}
      */
-    this.parse = function (nodeMetaInfo){
-        let info = {};
+    parse(nodeMetaInfo){
         if(typeof nodeMetaInfo==='string'){
             try {
                 nodeMetaInfo = JSON.parse(nodeMetaInfo);
-            } catch (e) {
-                console.log(e);
-                return info;
+            }catch (e) {
+                return this;
             }
         }
 
-        if (nodeMetaInfo.hasOwnProperty('validators')){
-            info.validators = this.validators = nodeMetaInfo.validators;
-        }
-        if (nodeMetaInfo.hasOwnProperty('modules')) {
-            info.modules = this.modules = nodeMetaInfo.modules;
-        }
-        if (nodeMetaInfo.hasOwnProperty('versions')) {
-            info.versions = this.versions = nodeMetaInfo.versions;
-        }
-        if (nodeMetaInfo.hasOwnProperty('messageBusAddress')) {
-            info.messageBusAddress = this.messageBusAddress = nodeMetaInfo.messageBusAddress;
-        }
+        this.validators = nodeMetaInfo.validators;
+        this.modules = nodeMetaInfo.modules;
+        this.versions = nodeMetaInfo.versions;
+        this.messageBusAddress = nodeMetaInfo.messageBusAddress;
 
-        return info;
+        return this;
     }
 
 
@@ -55,7 +46,7 @@ let NodeMetaInfo = function NodeMetaInfo(config) {
      * @param {object} moduleName
      * @param {string} version = '0.0'
      */
-     this.addModule = (moduleName, version = '0.0') => {
+    addModule(moduleName, version = '0.0') {
         this.modules.push(moduleName);
         this.versions[moduleName] = version;
     }
@@ -64,13 +55,11 @@ let NodeMetaInfo = function NodeMetaInfo(config) {
      * delete information about module
      * @param {string} moduleName
      */
-    this.deleteModule = (moduleName) => {
+    deleteModule(moduleName) {
         if(this.modules.indexOf(moduleName) !== -1) {
             this.modules.splice(this.modules.indexOf(moduleName), 1);
             delete this.versions[moduleName];
         }
     }
 
-    return this;
 }
-
