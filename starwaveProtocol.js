@@ -7,7 +7,7 @@
  * moment js required
  * @type {number}
  */
-
+'use strict'
 const MESSAGE_MUTEX_TIMEOUT = 1000;
 const LATENCY_TIME = 10 * 1000; //отклонение на устаревание сообщения
 
@@ -334,16 +334,13 @@ class starwaveProtocol {
          * @param message
          * @param excludeIp
          */
-        broadcast = function (message, excludeIp) {
-            sockets.forEach(function (socket) {
-                if(typeof excludeIp === 'undefined' || socket._socket.recieverAddress !== excludeIp) {
-                    write(socket, message)
-                } else {
+    broadcast(message, excludeIp) {
+        sockets.forEach(function (socket) {
+            if(typeof excludeIp === 'undefined' || socket._socket.recieverAddress !== excludeIp) {
+                write(socket, message)
+            } else {
 
-                }
-            });
-        };
-
-
-
+            }
+        });
+    };
 }

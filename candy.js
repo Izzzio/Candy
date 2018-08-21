@@ -165,7 +165,7 @@ function Candy(nodeList) {
         if (data.type === MessageType.SW_BROADCAST){
             if (typeof starwaveProtocol === 'function') {
                 let starwave = new starwaveProtocol(this, MessageType);
-                this._lastMsgIndex = starwave.handleMessage(message, messagesHandlers, ws);
+                this._lastMsgIndex = starwave.handleMessage(data, this.messagesHandlers, source);
             }
         }
 
