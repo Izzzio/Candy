@@ -9,7 +9,7 @@
  */
 'use strict'
 const MESSAGE_MUTEX_TIMEOUT = 1000;
-const LATENCY_TIME = 10 * 1000; //отклонение на устаревание сообщения
+const LATENCY_TIME = 10 * 1000; //time on obsolescence of message
 
 //const moment = require('moment');
 
@@ -30,7 +30,7 @@ class starwaveProtocol {
     }
 
     /**
-     * Создает сообщение
+     * Create message of starwave type
      * @param data
      * @param reciver
      * @param sender
@@ -83,7 +83,7 @@ class starwaveProtocol {
 
 
     /**
-     * Посылает сообщение непосредственно подключенному пиру(по его busAddress)
+     * send message to peer directly(using busAddress)
      * @param messageBusAddress
      * @param {object} message
      */
@@ -115,7 +115,7 @@ class starwaveProtocol {
     };
 
     /**
-     * Рассылает широковещательное сообщение по системе всем, кроме отправителя(если указан флаг)
+     * send broadcasting messages to all peers excluding previous sender
      * @param {object} message
      */
     broadcastMessage(message) {
@@ -139,8 +139,8 @@ class starwaveProtocol {
     };
 
     /**
-     *  посылает сообщение по протоколу starwave
-     * @param message //объект сообщения
+     *  send message using starwave protocol
+     * @param message //message object
      */
     sendMessage(message) {
         if(!this.sendMessageToPeer(message.reciver, message)) {   //не получилось отправить напрямую, нет напрямую подключенного пира, делаем рассылку всем
@@ -152,7 +152,7 @@ class starwaveProtocol {
     };
 
     /**
-     * разбираем входящее сообщение и смотрим что с ним  делать дальше
+     * disassemble incoming message and decide what we should do with it
      * @param message
      * @returns {*}
      */
@@ -194,9 +194,9 @@ class starwaveProtocol {
     };
 
     /**
-     * пересылаем полученное сообщение дальше по маршруту
+     * retranslate incoming message
      * @param message
-     * @returns {*} отправленное сообщение
+     * @returns {*} sended message
      */
     retranslateMessage(message) {
         //пересоздаем сообщение(если необходимо что-то добавить)
@@ -215,11 +215,11 @@ class starwaveProtocol {
     };
 
     /**
-     * полная обработка сообщения по протоколу
+     * full message processing according to the Protocol
      * @param message
      * @param messagesHandlers
      * @param ws
-     * @returns {*} //возвращает индекс обработанного сообщения
+     * @returns {*} //id of processed message
      */
     handleMessage(message, messagesHandlers, ws) {
         if(message.type === this.candy.MessageType.SW_BROADCAST) {
@@ -241,7 +241,7 @@ class starwaveProtocol {
     }
 
     /**
-     * работаем с мьютексом сообщения
+     * process the message mutex
      * @param messageBody
      */
     handleMessageMutex(messageBody) {
@@ -255,7 +255,7 @@ class starwaveProtocol {
     };
 
     /**
-     * проверяем является ли наш сервер получателем сообщения
+     * check if our node is the reciver
      * @param message
      * @returns {boolean}
      */
@@ -264,7 +264,7 @@ class starwaveProtocol {
     };
 
     /**
-     * прверяет, закончен ли маршрут
+     * check if our route is complete
      * @param message
      * @returns {boolean}
      */
@@ -294,7 +294,7 @@ class starwaveProtocol {
     }
 
     /**
-     * Формирует список подключенных пиров
+     * get the list of connected peers(sockets)
      * @returns {Array}
      */
     getCurrentPeers(fullSockets) {
@@ -310,7 +310,7 @@ class starwaveProtocol {
     }
 
     /**
-     * Возвращает адрес сокет по адресу шины сообщений
+     * find socket using bus address
      * @param address
      * @return {*}
      */
