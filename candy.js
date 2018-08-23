@@ -4,6 +4,10 @@
  * @Author: Andrey Nedobylsky
  */
 
+/**
+ * required nodemetainfo
+ */
+
 'use strict';
 
 const MessageType = {
@@ -11,7 +15,9 @@ const MessageType = {
     QUERY_ALL: 1,
     RESPONSE_BLOCKCHAIN: 2,
     MY_PEERS: 3,
-    BROADCAST: 4
+    BROADCAST: 4,
+    META: 5,
+    SW_BROADCAST: 6
 };
 
 const BlockchainRequestors = {
@@ -34,8 +40,9 @@ function Candy(nodeList) {
     this._lastMsgIndex = 0;
     this._requestQueue = {};
     this._autoloader = undefined;
-
     this.getid = () => (Math.random() * (new Date().getTime())).toString(36).replace(/[^a-z]+/g, '');
+    this.messagesHandlers = [];
+    this.routes = {};
 
     /**
      * Current reciever address. Override allowed
@@ -140,6 +147,28 @@ function Candy(nodeList) {
             that._lastMsgIndex = data.index;
             that._lastMsgTimestamp = data.timestamp;
         }
+
+        //add meta info handling //required NodeMetaInfo.js included
+        if(data.type === MessageType.META){
+            if (typeof NodeMetaInfo === 'function'){
+                let ind = that.sockets.indexOf(source);
+                if(ind > -1) {
+                    that.sockets[ind].nodeMetaInfo = (new NodeMetaInfo()).parse(data.data);
+                } else {
+                    console.log('Error: Unexpected error occurred when trying to add validators');
+                }
+            } else {
+                console.log('Error: NodeMetaInfo.js has not been included');
+            }
+        }
+
+        if (data.type === MessageType.SW_BROADCAST){
+            if (typeof starwaveProtocol === 'function') {
+                let starwave = new starwaveProtocol(this, MessageType);
+                this._lastMsgIndex = starwave.handleMessage(data, this.messagesHandlers, source);
+            }
+        }
+
     };
 
 
@@ -396,6 +425,16 @@ function Candy(nodeList) {
         let message = BlockchainRequestors.queryAllMsg(blockId);
         that.broadcast(JSON.stringify(message));
     };
+
+
+    /**
+     * Add message handler
+     * @param {string} id
+     * @param {Function} handler
+     */
+    this.registerMessageHandler = function (id, handler) {
+        this.messagesHandlers.push({id: id, handle: handler});
+    }
 
     return this;
 }
