@@ -169,8 +169,6 @@ function Candy(nodeList) {
             }
         }
 
-
-
     };
 
 
@@ -430,7 +428,7 @@ function Candy(nodeList) {
 
 
     /**
-     * Добавляет обработчик сообщения
+     * Add message handler
      * @param {string} id
      * @param {Function} handler
      */
