@@ -159,7 +159,7 @@ class starwaveProtocol {
         //message from ourselves
         if(message.sender === this.getAddress()) {
             try { //trying to close connection
-                message._socket.close();
+                this.getSocketByBusAddress(message.sender).close();
             } catch (e) {
             }
             return 0;
@@ -337,5 +337,18 @@ class starwaveProtocol {
 
             }
         }
-    };
+    }
+
+    avoidMultipleSockets(socket,busAddress){
+        //if there are more than 1 socket on busaddress we close connection
+        const sockets = this.getCurrentPeers(true);
+        socketsOnBus = sockets.filter( s => {
+            s.nodeMetaInfo.messageBusAddress === busAddress
+        });
+        if (socketsOnBus.length > 1) {
+
+        }
+    }
+
 }
+
