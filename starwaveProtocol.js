@@ -17,7 +17,6 @@ class starwaveProtocol {
 
     constructor(candy, messageType) {
         this.recieverAddress = candy.recieverAddress;
-       // this.config = config;
         this.candy = candy;
         this.candy.MessageType = messageType;
         this.getid = candy.getid;
@@ -49,11 +48,11 @@ class starwaveProtocol {
             reciver: reciver,
             sender: sender !== undefined ? sender : this.candy.recieverAddress,
             id: id,
-            timestamp: timestamp !== undefined ? timestamp : moment().utc().valueOf(),  //при пересылке сообщений. если указано время, значит, пересылается сообщение и оставляем первоначальное время создания
-            TTL: typeof TTL !== 'undefined' ? TTL : 0, //количество скачков сообщения
+            timestamp: timestamp !== undefined ? timestamp : moment().utc().valueOf(),
+            TTL: typeof TTL !== 'undefined' ? TTL : 0,
             mutex: this.getid() + this.getid() + this.getid(),
-            relevancyTime: relevancyTime !== undefined ? relevancyTime : LATENCY_TIME, // время актуальности сообщений
-            route: route !== undefined ? route : [],     //маршрут сообщения
+            relevancyTime: relevancyTime !== undefined ? relevancyTime : LATENCY_TIME, //time of message's relevancy
+            route: route !== undefined ? route : [],
             type: type !== undefined ? type : this.candy.MessageType.SW_BROADCAST,
             timestampOfStart: timestampOfStart !== undefined ? timestampOfStart : moment().utc().valueOf()
         };
@@ -91,23 +90,23 @@ class starwaveProtocol {
         let that = this;
         if(typeof that.candy !== 'undefined') {
 
-            if(messageBusAddress === this.getAddress()) { //Сообщение самому себе
+            if(messageBusAddress === this.getAddress()) { //message to yourself
                 this.handleMessage(message, this.candy.messagesHandlers, null);
                 return true;
             } else {
                 let socket = this.getSocketByBusAddress(messageBusAddress);
 
-                if(!socket) {  //нет такого подключенного сокета
+                if(!socket) {  //no such connected socket
                     return false;
                 } else {
-                    //добавляем свой адрес в маршруты, если маршрут не закончен
+                    //add this node address if the route isn't complete
                     if(!this.routeIsComplete(message)) {
                         message.route.push(this.candy.recieverAddress);
                     }
-                    //отправляем сообщение
+                    //send the message
                     this.write(socket, message);
                     this.handleMessageMutex(message);
-                    return true; //сообщение отправлено
+                    return true; //message has been sended
                 }
             }
 
@@ -120,19 +119,18 @@ class starwaveProtocol {
      */
     broadcastMessage(message) {
         let that = this;
-        //примечание по заданию: Если маршрут пустой ИЛИ если в маршруте нет известных получателей (за исключением отправителя), сообщения рассылаются всем кроме отправителя
-        //если пустой, значит, первая отправка и идет всем
+        //if the route is empty then it is the first sending and we send it to all
         if(typeof that.candy !== 'undefined') {
-            let prevSender; //отправитель сообщения
-            if(message.route.length > 0) { //если массив маршрута пуст, значит, это первая отправка сообщения и рассылать нужно без ограничений
-                //сохраняем предыдущего отправителя(он записан последним в массиве маршрутов)
+            let prevSender; //previous sender og the message
+            if(message.route.length > 0) { //if the route is empty then it's the first sending of the message and we send it to all connected peers without exclusions
+                //saving previous sender (last element in route array)
                 prevSender = that.getSocketByBusAddress(message.route[message.route.length - 1]);
             }
-            //добавляем свой адрес в маршруты
+            //adding our address to route
             message.route.push(this.candy.recieverAddress);
-            //устанавливаем тип сообщения
+            //set message type
             message.type = this.candy.MessageType.SW_BROADCAST;
-            //рассылаем всем, кроме отправителя(если это уже не первая пересылка)
+            //send to all except previous sender(if it's not the first sending)
             this.broadcast(message, prevSender);
             this.handleMessageMutex(message);
         }
@@ -143,12 +141,12 @@ class starwaveProtocol {
      * @param message //message object
      */
     sendMessage(message) {
-        if(!this.sendMessageToPeer(message.reciver, message)) {   //не получилось отправить напрямую, нет напрямую подключенного пира, делаем рассылку всем
-            //очищаем маршрут, начиная с текущего узла
+        if(!this.sendMessageToPeer(message.reciver, message)) {   //can't send directly, no such connected peer, then send to all
+            //clear route starting from our address
             this.broadcastMessage(message);
-            return 2; //отправили широковещательно
+            return 2; //sended broadcast
         }
-        return 1; //отправили напрямую
+        return 1; //sended directly to peer
     };
 
     /**
@@ -158,31 +156,30 @@ class starwaveProtocol {
      */
     manageIncomingMessage(message) {
 
-        //Сообщение от самого себя
+        //message from ourselves
         if(message.sender === this.getAddress()) {
-            try { //Попытка отключения от самого себя
+            try { //trying to close connection
                 message._socket.close();
             } catch (e) {
             }
             return 0;
         }
 
-        //проверяем актуальность сообщения
+        //check if the message is't too old
         if((moment().utc().valueOf()) > (message.timestamp + message.relevancyTime + LATENCY_TIME)) {
-            return 0; //оставляем без внимания сообщение
+            return 0; //do nothing
         }
-        //проверяем, достигли сообщение конечной точки
+        //is it an endpoint of the message
         if(this.endpointForMessage(message)) {
-            //сохраняем карту маршрута
-            if(message.route.length > 1) { //если карта маршрута из одного элемента, значит, есть прямое подключение к отправителю и записывать не нужно
-                message.route.push(this.candy.recieverAddress);//переворачиваем массив, чтобы использовать его для посылки
+            //save the route
+            if(message.route.length > 1) { //if the route consist of the only element we don't save the route becase of direct connection to peer
+                message.route.push(this.candy.recieverAddress);//reverse the route to use it in future sendings
                 this.candy.routes[message.sender] = message.route.reverse().filter((v, i, a) => a.indexOf(v) === i);
             }
-            return 1;   //признак того, что сообщение достигло цели
-        } else {        //если сообщение проходное
-            //пока ничего не делаем
+            return 1;   //message delivered
+        } else {        //if the message shoud be forwarded
+            //there should be foreward processing
             return 0;
-            //return this.retranslateMessage(message);
         }
         //сообщение актуально и не достигло получателя, значит
         //проверяем наличие закольцованности. если в маршруте уже есть этот адрес, а конечная точка еще не нашлась,то не пускаем дальше
@@ -199,16 +196,16 @@ class starwaveProtocol {
      * @returns {*} sended message
      */
     retranslateMessage(message) {
-        //пересоздаем сообщение(если необходимо что-то добавить)
+        //change some information in message
         let newMessage = message;
         if(this.routeIsComplete(newMessage)) {
-            let ind = newMessage.route.indexOf(this.candy.recieverAddress); // индекс текущего узла в маршрутной карте
-            if(!this.sendMessageToPeer(newMessage.route[ind + 1], newMessage)) { //не получилось отправить напрямую, нет напрямую подключенного пира, делаем рассылку всем
-                //очищаем маршрут, начиная с текущего узла, потому что маршрут сломан и перестраиваем его
+            let ind = newMessage.route.indexOf(this.candy.recieverAddress); // find index of this node in route array
+            if(!this.sendMessageToPeer(newMessage.route[ind + 1], newMessage)) {  //can't send directly, no such connected peer, then send to all
+                //clear route starting from our address because the toute is wrong and we should rebuild it
                 newMessage.route = newMessage.route.splice(ind);
                 this.broadcastMessage(newMessage);
             }
-        } else {//если маршрут не закончен
+        } else {//if the route isn't complete
             this.sendMessage(newMessage);
         }
         return newMessage;
@@ -224,15 +221,12 @@ class starwaveProtocol {
     handleMessage(message, messagesHandlers, ws) {
         if(message.type === this.candy.MessageType.SW_BROADCAST) {
             if(this.manageIncomingMessage(message) === 1) {
-                //значит, сообщение пришло в конечную точку и
-                /**
-                 * Проходимся по обработчикам входящих сообщений
-                 */
+                //message is on the endpoint and we wxecute handlers
                 for (let a in messagesHandlers) {
                     if(messagesHandlers.hasOwnProperty(a)) {
                         message._socket = ws;
                         if(messagesHandlers[a].handle(message)) {
-                            return message.id; //Если сообщение обработано, выходим
+                            return message.id; //if the message is processed we return
                         }
                     }
                 }
@@ -245,7 +239,6 @@ class starwaveProtocol {
      * @param messageBody
      */
     handleMessageMutex(messageBody) {
-        //взято из диспетчера
         this._messageMutex[messageBody.mutex] = true;
         setTimeout(() => {
             if(typeof this._messageMutex[messageBody.mutex] !== 'undefined') {
@@ -288,7 +281,7 @@ class starwaveProtocol {
     write (ws, message) {
         try {
             ws.send(JSON.stringify(message))
-        } catch (e) { //ошибка записи, возможно сокет уже не активен
+        } catch (e) { //send error. it's possibly that socket is inactive
             console.log('Send error: ' + e );
         }
     }
