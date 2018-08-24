@@ -338,7 +338,13 @@ class starwaveProtocol {
         }
     }
 
-    preventMultipleSockets(socket,busAddress){
+    /**
+     * close connection with socket if there are more then one url on that busaddress
+     * @param socket
+     * @param busAddress
+     * @returns {number} //status of the operation
+     */
+    preventMultipleSockets(socket, busAddress){
         if (busAddress === undefined) {
             return 1;
         }
