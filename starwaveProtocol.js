@@ -331,7 +331,7 @@ class starwaveProtocol {
         for (i = 0; i <= this.candy.sockets.length; i++){
             let socket = this.candy.sockets[i];
             if(typeof excludeIp === 'undefined' || socket !== excludeIp) {
-                this.write(socket, message)
+                this.write(socket, message);
             } else {
 
             }
@@ -350,10 +350,16 @@ class starwaveProtocol {
         }
         //if there are more than 1 socket on busaddress we close connection
         const sockets = this.getCurrentPeers(true);
-        let socketsOnBus = sockets.filter( s => {
-            return s.hasOwnProperty('nodeMetaInfo')? s.nodeMetaInfo.messageBusAddress === busAddress : false;
-        });
-        if (socketsOnBus.length > 1) {
+        let socketsOnBus = 0
+        const socketsNumber = sockets.length;
+        for (let i = 0; i < socketsNumber; i++){
+            if(sockets[i] && sockets[i].nodeMetaInfo) {
+                if (sockets[i].nodeMetaInfo.messageBusAddress === busAddress){
+                    socketsOnBus++;
+                }
+            }
+        }
+        if (socketsOnBus > 1) {
             socket.close();
             return 0; //close connection
         } else {
