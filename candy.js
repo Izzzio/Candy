@@ -229,9 +229,10 @@ function Candy(nodeList) {
             }, 10);
         };
 
-        socket.onclose = function (event) {
-            that.sockets[that.sockets.indexOf(socket)] = null;
-            delete that.sockets[that.sockets.indexOf(socket)];
+        socket.onclose = function (event)
+            that.sockets.splice(that.sockets.indexOf(socket),1);
+            // that.sockets[that.sockets.indexOf(socket)] = null;
+            // delete that.sockets[that.sockets.indexOf(socket)];
         };
 
         socket.onmessage = function (event) {
