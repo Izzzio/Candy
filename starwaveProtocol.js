@@ -344,9 +344,15 @@ class starwaveProtocol {
      * @param busAddress
      * @returns {number} //status of the operation
      */
-    preventMultipleSockets(socket, busAddress){
-        if (busAddress === undefined) {
-            return 1;
+    preventMultipleSockets(socket){
+        let busAddress;
+        if (socket.nodeMetaInfo) {
+            busAddress = socket.nodeMetaInfo.messageBusAddress;
+            if (busAddress === undefined) {
+                return 2; //socket without busAddress
+            }
+        }else{
+            return 3; //socket has no meta info
         }
         //if there are more than 1 socket on busaddress we close connection
         const sockets = this.getCurrentPeers(true);

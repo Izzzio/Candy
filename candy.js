@@ -91,7 +91,8 @@ function Candy(nodeList) {
 
         //prevent multiple sockets on one busaddress
         if (!this.allowMultiplySocketsOnBus && (this.starwave)){
-            if (!this.starwave.preventMultipleSockets(source, data.sender)){
+            if (this.starwave.preventMultipleSockets(ws) === 0) {
+                data = null;
                 return;
             }
         }
