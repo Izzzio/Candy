@@ -43,6 +43,14 @@ function Candy(nodeList) {
     this.getid = () => (Math.random() * (new Date().getTime())).toString(36).replace(/[^a-z]+/g, '');
     this.messagesHandlers = [];
     this.routes = {};
+    this.allowMultiplySocketsOnBus = false; //if TRUE we don't check
+
+
+    if (typeof starwaveProtocol === 'function') {
+        this.starwave = new starwaveProtocol(this, MessageType);
+    } else {
+        console.log("Error: Can't find starwaveProtocol module");
+    };
 
     /**
      * Current reciever address. Override allowed
@@ -80,6 +88,15 @@ function Candy(nodeList) {
      * @param {Object} data
      */
     this._dataRecieved = function (source, data) {
+
+        //prevent multiple sockets on one busaddress
+        if (!this.allowMultiplySocketsOnBus && (this.starwave)){
+            if (this.starwave.preventMultipleSockets(ws) === 0) {
+                data = null;
+                return;
+            }
+        }
+
         if(typeof that.ondata === 'function') {
             if(that.ondata(data)) {
                 return;
@@ -163,9 +180,8 @@ function Candy(nodeList) {
         }
 
         if (data.type === MessageType.SW_BROADCAST){
-            if (typeof starwaveProtocol === 'function') {
-                let starwave = new starwaveProtocol(this, MessageType);
-                this._lastMsgIndex = starwave.handleMessage(data, this.messagesHandlers, source);
+            if (this.starwave) {
+                this._lastMsgIndex = this.starwave.handleMessage(data, this.messagesHandlers, source);
             }
         }
 
@@ -212,9 +228,10 @@ function Candy(nodeList) {
             }, 10);
         };
 
-        socket.onclose = function (event) {
-            that.sockets[that.sockets.indexOf(socket)] = null;
-            delete that.sockets[that.sockets.indexOf(socket)];
+        socket.onclose = function (event){
+            that.sockets.splice(that.sockets.indexOf(socket),1);
+           // that.sockets[that.sockets.indexOf(socket)] = null;
+           // delete that.sockets[that.sockets.indexOf(socket)];
         };
 
         socket.onmessage = function (event) {
@@ -435,6 +452,7 @@ function Candy(nodeList) {
     this.registerMessageHandler = function (id, handler) {
         this.messagesHandlers.push({id: id, handle: handler});
     }
+
 
     return this;
 }

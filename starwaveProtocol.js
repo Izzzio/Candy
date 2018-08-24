@@ -16,10 +16,9 @@ const LATENCY_TIME = 10 * 1000; //time on obsolescence of message
 class starwaveProtocol {
 
     constructor(candy, messageType) {
-        this.recieverAddress = candy.recieverAddress;
         this.candy = candy;
         this.candy.MessageType = messageType;
-        this.getid = candy.getid;
+
         /**
          * Input message mutex
          * @type {{}}
@@ -50,7 +49,7 @@ class starwaveProtocol {
             id: id,
             timestamp: timestamp !== undefined ? timestamp : moment().utc().valueOf(),
             TTL: typeof TTL !== 'undefined' ? TTL : 0,
-            mutex: this.getid() + this.getid() + this.getid(),
+            mutex: this.candy.getid() + this.candy.getid() + this.candy.getid(),
             relevancyTime: relevancyTime !== undefined ? relevancyTime : LATENCY_TIME, //time of message's relevancy
             route: route !== undefined ? route : [],
             type: type !== undefined ? type : this.candy.MessageType.SW_BROADCAST,
@@ -329,24 +328,48 @@ class starwaveProtocol {
          */
     broadcast(message, excludeIp) {
         let i;
-        for (i = 0; i <= this.candy.sockets.length; i++){
+        for (i = 0; i < this.candy.sockets.length; i++){
             let socket = this.candy.sockets[i];
             if(typeof excludeIp === 'undefined' || socket !== excludeIp) {
-                this.write(socket, message)
+                this.write(socket, message);
             } else {
 
             }
         }
     }
 
-    avoidMultipleSockets(socket,busAddress){
+    /**
+     * close connection with socket if there are more then one url on that busaddress
+     * @param socket
+     * @param busAddress
+     * @returns {number} //status of the operation
+     */
+    preventMultipleSockets(socket){
+        let busAddress;
+        if (socket.nodeMetaInfo) {
+            busAddress = socket.nodeMetaInfo.messageBusAddress;
+            if (busAddress === undefined) {
+                return 2; //socket without busAddress
+            }
+        }else{
+            return 3; //socket has no meta info
+        }
         //if there are more than 1 socket on busaddress we close connection
         const sockets = this.getCurrentPeers(true);
-        socketsOnBus = sockets.filter( s => {
-            s.nodeMetaInfo.messageBusAddress === busAddress
-        });
-        if (socketsOnBus.length > 1) {
-
+        let socketsOnBus = 0;
+        const socketsNumber = sockets.length;
+        for (let i = 0; i < socketsNumber; i++){
+            if(sockets[i] && sockets[i].nodeMetaInfo) {
+                if (sockets[i].nodeMetaInfo.messageBusAddress === busAddress){
+                    socketsOnBus++;
+                }
+            }
+        }
+        if (socketsOnBus > 1) {
+            socket.close();
+            return 0; //close connection
+        } else {
+            return 1; // no other connections
         }
     }
 
