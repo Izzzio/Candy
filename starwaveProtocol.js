@@ -350,7 +350,7 @@ class starwaveProtocol {
         }
         //if there are more than 1 socket on busaddress we close connection
         const sockets = this.getCurrentPeers(true);
-        let socketsOnBus = 0
+        let socketsOnBus = 0;
         const socketsNumber = sockets.length;
         for (let i = 0; i < socketsNumber; i++){
             if(sockets[i] && sockets[i].nodeMetaInfo) {

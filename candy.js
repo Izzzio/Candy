@@ -90,9 +90,8 @@ function Candy(nodeList) {
     this._dataRecieved = function (source, data) {
 
         //prevent multiple sockets on one busaddress
-        if (!this.allowMultiplySocketsOnBus && (typeof starwaveProtocol === 'function')){
-            let starwave = new starwaveProtocol(this, MessageType);
-            if (!starwave.preventMultipleSockets(source, data.sender)){
+        if (!this.allowMultiplySocketsOnBus && (this.starwave)){
+            if (!this.starwave.preventMultipleSockets(source, data.sender)){
                 return;
             }
         }
@@ -180,9 +179,8 @@ function Candy(nodeList) {
         }
 
         if (data.type === MessageType.SW_BROADCAST){
-            if (typeof starwaveProtocol === 'function') {
-                let starwave = new starwaveProtocol(this, MessageType);
-                this._lastMsgIndex = starwave.handleMessage(data, this.messagesHandlers, source);
+            if (this.starwave) {
+                this._lastMsgIndex = this.starwave.handleMessage(data, this.messagesHandlers, source);
             }
         }
 
