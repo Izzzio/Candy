@@ -328,7 +328,7 @@ class starwaveProtocol {
          */
     broadcast(message, excludeIp) {
         let i;
-        for (i = 0; i <= this.candy.sockets.length; i++){
+        for (i = 0; i < this.candy.sockets.length; i++){
             let socket = this.candy.sockets[i];
             if(typeof excludeIp === 'undefined' || socket !== excludeIp) {
                 this.write(socket, message);
