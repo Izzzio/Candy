@@ -43,6 +43,14 @@ function Candy(nodeList) {
     this.getid = () => (Math.random() * (new Date().getTime())).toString(36).replace(/[^a-z]+/g, '');
     this.messagesHandlers = [];
     this.routes = {};
+    this.allowMultiplySocketsOnBus = false; //if TRUE we don't check
+
+
+    if (typeof starwaveProtocol === 'function') {
+        this.starwave = new starwaveProtocol(this, MessageType);
+    } else {
+        console.log("Error: Can't find starwaveProtocol module");
+    };
 
     /**
      * Current reciever address. Override allowed
@@ -80,6 +88,15 @@ function Candy(nodeList) {
      * @param {Object} data
      */
     this._dataRecieved = function (source, data) {
+
+        //prevent multiple sockets on one busaddress
+        if (!this.allowMultiplySocketsOnBus && (typeof starwaveProtocol === 'function')){
+            let starwave = new starwaveProtocol(this, MessageType);
+            if (!starwave.preventMultipleSockets(source, data.sender)){
+                return;
+            }
+        }
+
         if(typeof that.ondata === 'function') {
             if(that.ondata(data)) {
                 return;
@@ -435,6 +452,7 @@ function Candy(nodeList) {
     this.registerMessageHandler = function (id, handler) {
         this.messagesHandlers.push({id: id, handle: handler});
     }
+
 
     return this;
 }

@@ -16,10 +16,9 @@ const LATENCY_TIME = 10 * 1000; //time on obsolescence of message
 class starwaveProtocol {
 
     constructor(candy, messageType) {
-        this.recieverAddress = candy.recieverAddress;
         this.candy = candy;
         this.candy.MessageType = messageType;
-        this.getid = candy.getid;
+
         /**
          * Input message mutex
          * @type {{}}
@@ -50,7 +49,7 @@ class starwaveProtocol {
             id: id,
             timestamp: timestamp !== undefined ? timestamp : moment().utc().valueOf(),
             TTL: typeof TTL !== 'undefined' ? TTL : 0,
-            mutex: this.getid() + this.getid() + this.getid(),
+            mutex: this.candy.getid() + this.candy.getid() + this.candy.getid(),
             relevancyTime: relevancyTime !== undefined ? relevancyTime : LATENCY_TIME, //time of message's relevancy
             route: route !== undefined ? route : [],
             type: type !== undefined ? type : this.candy.MessageType.SW_BROADCAST,
@@ -339,14 +338,20 @@ class starwaveProtocol {
         }
     }
 
-    avoidMultipleSockets(socket,busAddress){
+    preventMultipleSockets(socket,busAddress){
+        if (busAddress === undefined) {
+            return 1;
+        }
         //if there are more than 1 socket on busaddress we close connection
         const sockets = this.getCurrentPeers(true);
-        socketsOnBus = sockets.filter( s => {
-            s.nodeMetaInfo.messageBusAddress === busAddress
+        let socketsOnBus = sockets.filter( s => {
+            return s.hasOwnProperty('nodeMetaInfo')? s.nodeMetaInfo.messageBusAddress === busAddress : false;
         });
         if (socketsOnBus.length > 1) {
-
+            socket.close();
+            return 0; //close connection
+        } else {
+            return 1; // no other connections
         }
     }
 
