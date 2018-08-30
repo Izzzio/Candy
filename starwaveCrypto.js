@@ -5,15 +5,16 @@
  * publicKey - public key of the sender which wants to make crypted tunnel
  * Using secp256k1 curve and aes256 algorithm as default
  *
- * This module uses browser implementation of crypto module:
- * https://github.com/crypto-browserify
- * Crypto-browserify should be included before
+ * This module uses elliptic library for creating keypair and forge to encrypt/decrypt message
+ *
+ *
  */
 
 'use strict';
 
 
-//const crypto = require("crypto");
+
+
 
 class StarwaveCrypto {
     /*constructor(bits = 2048){
@@ -22,13 +23,15 @@ class StarwaveCrypto {
         this.public = this.generateKeys();
     };*/
 
-    constructor(starwaveProtocolObject, secretKeys, curve = sjcl.ecc.curves.k256 ){
+    constructor(starwaveProtocolObject, secretKeys, curve = 'secp256k1' ){
         // EDCA object
-        this.keyObject = sjcl.ecc.elGamal.generateKeys(curve);
-        this.public = this.getPublicInHex();
+        this.ec = new elliptic.ec(curve);
+        this.keyObject = this.ec.genKeyPair();
+        this.public = getPublicInHex();
         this.starwave = starwaveProtocolObject;
         this.secretKeys = secretKeys;
         this.curve = curve;
+
     };
 
     /**
@@ -36,8 +39,7 @@ class StarwaveCrypto {
      * @returns {*}
      */
     getPublicInHex (keyObject = this.keyObject){
-        let publicKey = keyObject.pub.get();
-        publicKey = sjcl.codec.hex.fromBits(publicKey.x.concat(publicKey.y));
+        let publicKey = keyObject.getPublic(true,'hex');
         return publicKey;
     }
 
@@ -47,22 +49,16 @@ class StarwaveCrypto {
      * @returns {*}
      */
     createSecret(externalPublic){
-        let secret = this.keyObject.sec.get();
+
+        let secret;
         try {
-            secret = secret.dh(externalPublic);
+            secret = this.ec.curve.decodePoint(externalPublic, 'hex');
         } catch (err) {
             console.log('Error: Can not create secret key ' + err); //if externalPublic is wrong
         }
         return secret;
     };
 
-    unserialiseExternalPublicKey(exPublicInHex){
-        let pub = new sjcl.ecc.elGamal.publicKey(
-            this.curve,
-            sjcl.codec.hex.toBits(exPublicInHex)
-        );
-        return pub;
-    }
 
     /**
      * Encrypts data
