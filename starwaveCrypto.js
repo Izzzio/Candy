@@ -3,7 +3,7 @@
  * new fields in message object:
  * encrypted - means that message is encrypted
  * publicKey - public key of the sender which wants to make crypted tunnel
- * Using secp521r1 curve and aes256 algorithm as default
+ * Using secp256k1 curve and aes256 algorithm as default
  *
  * This module uses browser implementation of crypto module:
  * https://github.com/crypto-browserify
@@ -22,20 +22,22 @@ class StarwaveCrypto {
         this.public = this.generateKeys();
     };*/
 
-    constructor(starwaveProtocolObject, secretKeys, curve = 'secp521r1'){
+    constructor(starwaveProtocolObject, secretKeys, curve = sjcl.ecc.curves.k256 ){
         // EDCA object
-        this.keyObject = createECDH(curve);
-        this.public = this.generateKeys();
+        this.keyObject = sjcl.ecc.elGamal.generateKeys(curve);
+        this.public = this.getPublicInHex();
         this.starwave = starwaveProtocolObject;
         this.secretKeys = secretKeys;
+        this.curve = curve;
     };
 
     /**
-     * generate keys object for Diffie-Hellman
+     * get public key object for Diffie-Hellman
      * @returns {*}
      */
-    generateKeys (){
-        let publicKey = this.keyObject.generateKeys('hex');
+    getPublicInHex (keyObject = this.keyObject){
+        let publicKey = keyObject.pub.get();
+        publicKey = sjcl.codec.hex.fromBits(publicKey.x.concat(publicKey.y));
         return publicKey;
     }
 
@@ -45,14 +47,22 @@ class StarwaveCrypto {
      * @returns {*}
      */
     createSecret(externalPublic){
-        let secret;
+        let secret = this.keyObject.sec.get();
         try {
-            secret = this.keyObject.computeSecret(externalPublic, 'hex', 'hex');
+            secret = secret.dh(externalPublic);
         } catch (err) {
             console.log('Error: Can not create secret key ' + err); //if externalPublic is wrong
         }
         return secret;
     };
+
+    unserialiseExternalPublicKey(exPublicInHex){
+        let pub = new sjcl.ecc.elGamal.publicKey(
+            this.curve,
+            sjcl.codec.hex.toBits(exPublicInHex)
+        );
+        return pub;
+    }
 
     /**
      * Encrypts data
