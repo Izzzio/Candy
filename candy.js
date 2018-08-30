@@ -44,6 +44,8 @@ function Candy(nodeList) {
     this.messagesHandlers = [];
     this.routes = {};
     this.allowMultiplySocketsOnBus = false; //if TRUE we don't check
+    
+    this.secretKeys = {}; //consist of secret keys of different busAddresses of peers
 
 
     if (typeof starwaveProtocol === 'function') {
