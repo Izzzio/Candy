@@ -5,16 +5,12 @@
  * publicKey - public key of the sender which wants to make crypted tunnel
  * Using secp256k1 curve and aes256 algorithm as default
  *
- * This module uses elliptic library for creating keypair and forge to encrypt/decrypt message
- *
- *
+ * This module uses elliptic library for creating keypair and Stanford Javascript Crypto Library (SJCL) to encrypt/decrypt message
+ * https://github.com/indutny/elliptic
+ * https://github.com/bitwiseshiftleft/sjcl
  */
 
 'use strict';
-
-
-
-
 
 class StarwaveCrypto {
     /*constructor(bits = 2048){
@@ -24,7 +20,7 @@ class StarwaveCrypto {
     };*/
 
     constructor(starwaveProtocolObject, secretKeys, curve = 'secp256k1' ){
-        // EDCA object
+        // EСDР object
         this.ec = new elliptic.ec(curve);
         this.keyObject = this.ec.genKeyPair();
         this.public = getPublicInHex();
@@ -64,12 +60,9 @@ class StarwaveCrypto {
      * Encrypts data
      * @param data
      * @param secret
-     * @param algorithm
      */
-    cipherData(data, secret, algorithm = 'aes256'){
-        const cipher = crypto.createCipher(algorithm, secret);
-        let encrypted = cipher.update(data,'utf8', 'hex');
-        encrypted += cipher.final('hex');
+    cipherData(data, secret){
+        let encrypted = sjcl.encrypt(secret, data);
         return encrypted;
     }
 
@@ -77,13 +70,10 @@ class StarwaveCrypto {
      * Decripts data
      * @param encryptedData
      * @param secret
-     * @param algorithm
      * @returns {*}
      */
-    decipherData(encryptedData, secret, algorithm = 'aes256'){
-        const decipher = crypto.createDecipher(algorithm, secret);
-        let data = decipher.update(encryptedData,'hex', 'utf8');
-        data += decipher.final('utf8');
+    decipherData(encryptedData, secret){
+        let data = sjcl.decrypt(secret, encryptedData);
         return data;
     }
 
