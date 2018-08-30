@@ -25,6 +25,8 @@ class starwaveProtocol {
          * @private
          */
         this._messageMutex = {};
+
+        this.starwaveCrypto = new StarwaveCrypto(this, this.candy,secretKeys);
     }
 
     /**
@@ -220,7 +222,8 @@ class starwaveProtocol {
     handleMessage(message, messagesHandlers, ws) {
         if(message.type === this.candy.MessageType.SW_BROADCAST) {
             if(this.manageIncomingMessage(message) === 1) {
-                //message is on the endpoint and we wxecute handlers
+                this.starwaveCrypto.handleIncomingMessage(message);
+                //message is on the endpoint and we execute handlers
                 for (let a in messagesHandlers) {
                     if(messagesHandlers.hasOwnProperty(a)) {
                         message._socket = ws;
