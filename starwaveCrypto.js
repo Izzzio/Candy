@@ -20,14 +20,13 @@ class StarwaveCrypto {
     };*/
 
     constructor(starwaveProtocolObject, secretKeys, curve = 'secp256k1' ){
-        // EСDР object
+        // EСDH object
         this.ec = new elliptic.ec(curve);
         this.keyObject = this.ec.genKeyPair();
-        this.public = getPublicInHex();
+        this.public = this.getPublicInHex();
         this.starwave = starwaveProtocolObject;
         this.secretKeys = secretKeys;
         this.curve = curve;
-
     };
 
     /**
@@ -48,7 +47,8 @@ class StarwaveCrypto {
 
         let secret;
         try {
-            secret = this.ec.curve.decodePoint(externalPublic, 'hex');
+            let pub = this.ec.curve.decodePoint(externalPublic, 'hex'); //get public key object from string
+            secret = this.keyObject.derive(pub).toString(16);
         } catch (err) {
             console.log('Error: Can not create secret key ' + err); //if externalPublic is wrong
         }
@@ -72,8 +72,16 @@ class StarwaveCrypto {
      * @param secret
      * @returns {*}
      */
-    decipherData(encryptedData, secret){
-        let data = sjcl.decrypt(secret, encryptedData);
+    decipherData(encryptedData, secret) {
+        let data;
+        try {
+            //make tranformations because of little features in crypto (node) - it uses empty salt array
+            let ct = CryptoJS.enc.Hex.parse(encryptedData);
+            let salt = CryptoJS.lib.WordArray.create(0); // empty array
+            data = CryptoJS.AES.decrypt({ciphertext: ct, salt: salt}, secret).toString(CryptoJS.enc.Utf8);
+        } catch (e) {
+            console.log('Error decrypting data: ' + e)
+        }
         return data;
     }
 

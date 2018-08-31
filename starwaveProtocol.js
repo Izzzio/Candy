@@ -9,7 +9,7 @@
  */
 'use strict'
 const MESSAGE_MUTEX_TIMEOUT = 1000;
-const LATENCY_TIME = 10 * 1000; //time on obsolescence of message
+const LATENCY_TIME = 100 * 1000; //time on obsolescence of message
 
 //const moment = require('moment');
 
@@ -26,7 +26,7 @@ class starwaveProtocol {
          */
         this._messageMutex = {};
 
-        this.starwaveCrypto = new StarwaveCrypto(this, this.candy,secretKeys);
+        this.starwaveCrypto = new StarwaveCrypto(this, this.candy.secretKeys);
     }
 
     /**
@@ -167,7 +167,8 @@ class starwaveProtocol {
         }
 
         //check if the message is't too old
-        if((moment().utc().valueOf()) > (message.timestamp + message.relevancyTime + LATENCY_TIME)) {
+        let m = moment().utc().valueOf();
+        if(m > (message.timestamp + message.relevancyTime + LATENCY_TIME)) {
             return 0; //do nothing
         }
         //is it an endpoint of the message
