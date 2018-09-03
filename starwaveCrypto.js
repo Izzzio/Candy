@@ -48,7 +48,8 @@ class StarwaveCrypto {
         let secret;
         try {
             let pub = this.ec.curve.decodePoint(externalPublic, 'hex'); //get public key object from string
-            secret = this.keyObject.derive(pub).toString(16);
+            secret = this.keyObject.derive(pub);
+            secret = secret.toString(16);
         } catch (err) {
             console.log('Error: Can not create secret key ' + err); //if externalPublic is wrong
         }
@@ -62,7 +63,27 @@ class StarwaveCrypto {
      * @param secret
      */
     cipherData(data, secret){
-        let encrypted = sjcl.encrypt(secret, data);
+
+
+        let encrypted = CryptoJS.AES.encrypt(data, secret).toString();
+        encrypted = encrypted.toString();
+       // encrypted =  CryptoJS.enc.Base64.parse(encryptedData);
+
+        //let encrypted = CryptoJS.AES.encrypt(data, secret).toString();
+       /* try {
+            let options = { mode: CryptoJS.mode.CBC, iv: iv};
+            encrypted = CryptoJS.AES.encrypt(msg, this.pass, options);
+        } catch (err) {
+            console.error('Error trying encrypt data' + err);
+        }
+        return encrypted;*/
+       /* //output in base64 format so we should convert it to hex
+        try{
+            let b64 = CryptoJS.enc.Base64.parse(encrypted);
+            encrypted = b64.toString(CryptoJS.enc.Hex);
+        } catch (e) {
+            console.log('Error converting encrypted data: ' + e)
+        }*/
         return encrypted;
     }
 
@@ -78,7 +99,8 @@ class StarwaveCrypto {
             //make tranformations because of little features in crypto (node) - it uses empty salt array
             let ct = CryptoJS.enc.Hex.parse(encryptedData);
             let salt = CryptoJS.lib.WordArray.create(0); // empty array
-            data = CryptoJS.AES.decrypt({ciphertext: ct, salt: salt}, secret).toString(CryptoJS.enc.Utf8);
+            data = CryptoJS.AES.decrypt({ciphertext: ct, salt: salt}, secret);
+            data = data.toString(CryptoJS.enc.Utf8);
         } catch (e) {
             console.log('Error decrypting data: ' + e)
         }
@@ -101,11 +123,13 @@ class StarwaveCrypto {
         //if we have secret key associated with this socket than we have the tunnel
         if (this.secretKeys[message.sender]){
             decryptedData = this.decipherData(message.data, this.secretKeys[message.sender]);
-            //try to parse json
-            try{
-                decryptedData = JSON.parse(decryptedData)
-            } catch (e) {
-                console.log("Error: An error occurred while parsing decrypted text: " + e);
+            if (decryptedData) {
+                //try to parse json
+                try {
+                    decryptedData = JSON.parse(decryptedData)
+                } catch (e) {
+                    console.log("Error: An error occurred while parsing decrypted text: " + e);
+                }
             }
             message.data = decryptedData;
             delete message.encrypted;
