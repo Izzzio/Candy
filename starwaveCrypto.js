@@ -63,9 +63,9 @@ class StarwaveCrypto {
      * @param secret
      */
     cipherData(data, secret){
-        let salt = CryptoJS.lib.WordArray.create(0); // empty array
-        let encrypted = CryptoJS.AES.encrypt(data, secret, {salt: salt});
-       // let encrypted = CryptoJS.AES.encrypt(data, secret.);
+        //let salt = CryptoJS.lib.WordArray.create(0); // empty array
+       // let encrypted = CryptoJS.AES.encrypt(data, secret, {salt: salt});
+        let encrypted = CryptoJS.AES.encrypt(data, secret);
         encrypted = encrypted.toString();
         //output in base64 format so we should convert it to hex
         try{
@@ -104,9 +104,12 @@ class StarwaveCrypto {
         let data;
         try {
             //make tranformations because of little features in crypto (node) - it uses empty salt array
-            let ct = CryptoJS.enc.Hex.parse(encryptedData);
-            let salt = CryptoJS.lib.WordArray.create(0); // empty array
-            data = CryptoJS.AES.decrypt({ciphertext: ct, salt: salt}, secret);
+            //let ct = CryptoJS.enc.Hex.parse(encryptedData);
+            //let salt = CryptoJS.lib.WordArray.create(0); // empty array
+            //data = CryptoJS.AES.decrypt({ciphertext: ct, salt: salt}, secret);
+            let b64 = CryptoJS.enc.Hex.parse(encryptedData);
+            let bytes = b64.toString(CryptoJS.enc.Base64);
+            data = CryptoJS.AES.decrypt(bytes, secret);
             data = data.toString(CryptoJS.enc.Utf8);
         } catch (e) {
             console.log('Error decrypting data: ' + e)
