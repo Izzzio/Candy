@@ -63,10 +63,17 @@ class StarwaveCrypto {
      * @param secret
      */
     cipherData(data, secret){
-
-
-        let encrypted = CryptoJS.AES.encrypt(data, secret).toString();
+        let salt = CryptoJS.lib.WordArray.create(0); // empty array
+        let encrypted = CryptoJS.AES.encrypt(data, secret, {salt: salt});
+       // let encrypted = CryptoJS.AES.encrypt(data, secret.);
         encrypted = encrypted.toString();
+        //output in base64 format so we should convert it to hex
+        try{
+            let b64 = CryptoJS.enc.Base64.parse(encrypted);
+            encrypted = b64.toString(CryptoJS.enc.Hex);
+        } catch (e) {
+            console.log('Error converting encrypted data: ' + e)
+        }
        // encrypted =  CryptoJS.enc.Base64.parse(encryptedData);
 
         //let encrypted = CryptoJS.AES.encrypt(data, secret).toString();
