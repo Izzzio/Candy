@@ -5,19 +5,14 @@
  * publicKey - public key of the sender which wants to make crypted tunnel
  * Using secp256k1 curve and aes256 algorithm as default
  *
- * This module uses elliptic library for creating keypair and Stanford Javascript Crypto Library (SJCL) to encrypt/decrypt message
+ * This module uses elliptic library for creating keypair and crypto-js to encrypt/decrypt message
  * https://github.com/indutny/elliptic
- * https://github.com/bitwiseshiftleft/sjcl
+ * https://github.com/brix/crypto-js
  */
 
 'use strict';
 
 class StarwaveCrypto {
-    /*constructor(bits = 2048){
-        //diffiehellman object
-        this.keyObject = crypto.createDiffieHellman(bits);
-        this.public = this.generateKeys();
-    };*/
 
     constructor(starwaveProtocolObject, secretKeys, curve = 'secp256k1' ){
         // EСDH object
@@ -61,36 +56,12 @@ class StarwaveCrypto {
      * Encrypts data
      * @param data
      * @param secret
+     * @returns {*}
      */
     cipherData(data, secret){
-        //let salt = CryptoJS.lib.WordArray.create(0); // empty array
-       // let encrypted = CryptoJS.AES.encrypt(data, secret, {salt: salt});
-        let encrypted = CryptoJS.AES.encrypt(data, secret);
-        encrypted = encrypted.toString();
-        //output in base64 format so we should convert it to hex
-        try{
-            let b64 = CryptoJS.enc.Base64.parse(encrypted);
-            encrypted = b64.toString(CryptoJS.enc.Hex);
-        } catch (e) {
-            console.log('Error converting encrypted data: ' + e)
-        }
-       // encrypted =  CryptoJS.enc.Base64.parse(encryptedData);
-
-        //let encrypted = CryptoJS.AES.encrypt(data, secret).toString();
-       /* try {
-            let options = { mode: CryptoJS.mode.CBC, iv: iv};
-            encrypted = CryptoJS.AES.encrypt(msg, this.pass, options);
-        } catch (err) {
-            console.error('Error trying encrypt data' + err);
-        }
-        return encrypted;*/
-       /* //output in base64 format so we should convert it to hex
-        try{
-            let b64 = CryptoJS.enc.Base64.parse(encrypted);
-            encrypted = b64.toString(CryptoJS.enc.Hex);
-        } catch (e) {
-            console.log('Error converting encrypted data: ' + e)
-        }*/
+        let encrypted = CryptoJS.AES.encrypt(data, secret).toString(); //base64
+        let b64 = CryptoJS.enc.Base64.parse(encrypted);//object
+        encrypted = b64.toString(CryptoJS.enc.Hex);//hex
         return encrypted;
     }
 
@@ -103,10 +74,7 @@ class StarwaveCrypto {
     decipherData(encryptedData, secret) {
         let data;
         try {
-            //make tranformations because of little features in crypto (node) - it uses empty salt array
-            //let ct = CryptoJS.enc.Hex.parse(encryptedData);
-            //let salt = CryptoJS.lib.WordArray.create(0); // empty array
-            //data = CryptoJS.AES.decrypt({ciphertext: ct, salt: salt}, secret);
+            //unpack from hex to native base64 and to object
             let b64 = CryptoJS.enc.Hex.parse(encryptedData);
             let bytes = b64.toString(CryptoJS.enc.Base64);
             data = CryptoJS.AES.decrypt(bytes, secret);
