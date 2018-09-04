@@ -44,15 +44,16 @@ function Candy(nodeList) {
     this.messagesHandlers = [];
     this.routes = {};
     this.allowMultiplySocketsOnBus = false; //if TRUE we don't check
-    
+
     this.secretKeys = {}; //consist of secret keys of different busAddresses of peers
 
 
-    if (typeof starwaveProtocol === 'function') {
+    if(typeof starwaveProtocol === 'function') {
         this.starwave = new starwaveProtocol(this, MessageType);
     } else {
         console.log("Error: Can't find starwaveProtocol module");
-    };
+    }
+    ;
 
     /**
      * Current reciever address. Override allowed
@@ -92,8 +93,8 @@ function Candy(nodeList) {
     this._dataRecieved = function (source, data) {
 
         //prevent multiple sockets on one busaddress
-        if (!this.allowMultiplySocketsOnBus && (this.starwave)){
-            if (this.starwave.preventMultipleSockets(source) === 0) {
+        if(!this.allowMultiplySocketsOnBus && (this.starwave)) {
+            if(this.starwave.preventMultipleSockets(source) === 0) {
                 data = null;
                 return;
             }
@@ -168,8 +169,8 @@ function Candy(nodeList) {
         }
 
         //add meta info handling //required NodeMetaInfo.js included
-        if(data.type === MessageType.META){
-            if (typeof NodeMetaInfo === 'function'){
+        if(data.type === MessageType.META) {
+            if(typeof NodeMetaInfo === 'function') {
                 let ind = that.sockets.indexOf(source);
                 if(ind > -1) {
                     that.sockets[ind].nodeMetaInfo = (new NodeMetaInfo()).parse(data.data);
@@ -181,8 +182,8 @@ function Candy(nodeList) {
             }
         }
 
-        if (data.type === MessageType.SW_BROADCAST){
-            if (this.starwave) {
+        if(data.type === MessageType.SW_BROADCAST) {
+            if(this.starwave) {
                 this._lastMsgIndex = this.starwave.handleMessage(data, this.messagesHandlers, source);
             }
         }
@@ -230,10 +231,10 @@ function Candy(nodeList) {
             }, 10);
         };
 
-        socket.onclose = function (event){
-            that.sockets.splice(that.sockets.indexOf(socket),1);
-           // that.sockets[that.sockets.indexOf(socket)] = null;
-           // delete that.sockets[that.sockets.indexOf(socket)];
+        socket.onclose = function (event) {
+            that.sockets.splice(that.sockets.indexOf(socket), 1);
+            // that.sockets[that.sockets.indexOf(socket)] = null;
+            // delete that.sockets[that.sockets.indexOf(socket)];
         };
 
         socket.onmessage = function (event) {
@@ -453,6 +454,7 @@ function Candy(nodeList) {
      */
     this.registerMessageHandler = function (id, handler) {
         this.messagesHandlers.push({id: id, handle: handler});
+        this.messagesHandlers.sort((a, b) => a.id > b.id);
     };
 
 
