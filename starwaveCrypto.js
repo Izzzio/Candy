@@ -12,25 +12,39 @@
 
 'use strict';
 
+const SWCRYPTO_CONNECTION_MESSAGE_TYPE = 'DH-CONNECTION';
+
 class StarwaveCrypto {
 
-    constructor(starwaveProtocolObject, secretKeys, curve = 'secp256k1' ){
+    constructor(starwaveProtocolObject, secretKeysKeyring, curve = 'secp256k1') {
+        let that = this;
         // EСDH object
         this.ec = new elliptic.ec(curve);
         this.keyObject = this.ec.genKeyPair();
-        this.public = this.getPublicInHex();
+        this.public = this.generateKeys();
         this.starwave = starwaveProtocolObject;
-        this.secretKeys = secretKeys;
+        this.secretKeys = secretKeysKeyring;
         this.curve = curve;
+
+        this._connectionsCallbacks = {};
+
+        starwaveProtocolObject.registerMessageHandler(SWCRYPTO_CONNECTION_MESSAGE_TYPE, function (message) {
+            that.handleIncomingMessage(message);
+            return true;
+        });
+
+        starwaveProtocolObject.registerMessageHandler('', function (message) {
+            that.handleIncomingMessage(message);
+            return false;
+        });
     };
 
     /**
      * get public key object for Diffie-Hellman
      * @returns {*}
      */
-    getPublicInHex (keyObject = this.keyObject){
-        let publicKey = keyObject.getPublic(true,'hex');
-        return publicKey;
+    generateKeys(keyObject = this.keyObject) {
+        return keyObject.getPublic(true, 'hex');
     }
 
     /**
@@ -38,7 +52,7 @@ class StarwaveCrypto {
      * @param externalPublic
      * @returns {*}
      */
-    createSecret(externalPublic){
+    createSecret(externalPublic) {
 
         let secret;
         try {
@@ -58,7 +72,7 @@ class StarwaveCrypto {
      * @param secret
      * @returns {*}
      */
-    cipherData(data, secret){
+    cipherData(data, secret) {
         let encrypted = CryptoJS.AES.encrypt(data, secret).toString(); //base64
         let b64 = CryptoJS.enc.Base64.parse(encrypted);//object
         encrypted = b64.toString(CryptoJS.enc.Hex);//hex
@@ -90,18 +104,18 @@ class StarwaveCrypto {
      * @param message
      * @returns {*}
      */
-    decipherMessage(message){
+    decipherMessage(message) {
         let decryptedData;
 
         //if message didn't encrypted, return data
-        if (!message.encrypted){
+        if(!message.encrypted) {
             return decryptedData = message.data;
         }
 
         //if we have secret key associated with this socket than we have the tunnel
-        if (this.secretKeys[message.sender]){
+        if(this.secretKeys[message.sender]) {
             decryptedData = this.decipherData(message.data, this.secretKeys[message.sender]);
-            if (decryptedData) {
+            if(decryptedData) {
                 //try to parse json
                 try {
                     decryptedData = JSON.parse(decryptedData)
@@ -109,6 +123,7 @@ class StarwaveCrypto {
                     console.log("Error: An error occurred while parsing decrypted text: " + e);
                 }
             }
+            message.original = message.data;
             message.data = decryptedData;
             delete message.encrypted;
         }
@@ -120,10 +135,10 @@ class StarwaveCrypto {
      * @param message
      * @returns {*}
      */
-    cipherMessage(message){
+    cipherMessage(message) {
         let cryptedData;
         //should be assotiated secret key and check that message has not been already encrypted
-        if (this.secretKeys[message.reciver] && !message.encrypted){
+        if(this.secretKeys[message.reciver] && !message.encrypted) {
             cryptedData = this.cipherData(JSON.stringify(message.data), this.secretKeys[message.reciver]);
             message.encrypted = true;
             message.data = cryptedData;
@@ -136,34 +151,51 @@ class StarwaveCrypto {
      * @param message
      * @returns {*}
      */
-    handleIncomingMessage(message){
+    handleIncomingMessage(message) {
         //watch if the message has Public key field then the message is only for sending the key
-        if (message.publicKey) {
+        if(message.publicKey) {
             let sc = this.createSecret(message.publicKey); //exclude situation with exception on wrong public
             //if we don't have secret key then we save sender publickey and create secret and send our public to make connection
-            if (!this.secretKeys[message.sender] && sc){
+            if((!this.secretKeys[message.sender] && sc) || this.secretKeys[message.sender] !== sc) {
                 this.makeConnection(message.sender);
             }
-            if (sc){
+            if(sc) {
                 this.secretKeys[message.sender] = sc;
+                if(this._connectionsCallbacks[message.sender]) {
+                    this._connectionsCallbacks[message.sender](message.sender, sc);
+                    delete this._connectionsCallbacks[message.sender];
+                }
             }
             delete message.publicKey;
             return 0;
         }
-        //try to decipher message if it possible
-        return this.decipherMessage(message); //undefined if we have errors
+
+        message.data = this.decipherMessage(message); //undefined if we have errors
+        return 1;
     }
 
     /**
-     * send public key to messagebus address
-     * @param messageBus
-     * @returns {{data: *, reciver: *, sender: *, id: *, timestamp: number, TTL: number, index: *, mutex: string, relevancyTime: Array, route: Array, type: number, timestampOfStart: number}|any|{type: number, data: *, reciver: *, recepient: *, id: *, timestamp: number, TTL: number, index: number}}
+     * Make encrypted connection
+     * @param {string} messageBus   Connection address
+     * @param {(function(string, string))} cb Connection callback 1 - receiver, 2 - secret key
+     * @return {StarwaveCrypto}
      */
-    makeConnection(messageBus){
-        let message = this.starwave.createMessage('',messageBus,undefined,'DH-CONNECTION');
+    makeConnection(messageBus, cb) {
+        let that = this;
+        if(cb) {
+            this._connectionsCallbacks[messageBus] = cb;
+
+            //Call callback if key already created
+            if(this.secretKeys[messageBus]) {
+                setTimeout(function () {
+                    cb(messageBus, that.secretKeys[messageBus]);
+                }, 1);
+            }
+        }
+        let message = this.starwave.createMessage('{}', messageBus, undefined, SWCRYPTO_CONNECTION_MESSAGE_TYPE);
         message.publicKey = this.public;
         this.starwave.sendMessage(message);
-        return message;
+        return this;
     }
 
     /**
@@ -171,21 +203,20 @@ class StarwaveCrypto {
      * @param message
      * @returns {number}
      */
-    sendMessage(message){
+    sendMessage(message) {
         //check if we have secret key for reciver
         let sk = this.secretKeys[message.reciver]; //secret key
-        if (sk){
-            if (this.cipherMessage(message)){
+        if(sk) {
+            if(this.cipherMessage(message)) {
                 this.starwave.sendMessage(message);
                 return message;
-            }else{
+            } else {
                 console.log("Error: Can't cipher message");
                 return 2;
             }
         }
-        else
-        {
-            console.log(`Error: There is no secret key for address: ${message.reciver}`)
+        else {
+            console.log(`Error: There is no secret key for address: ${message.reciver}`);
             return 1;
         }
     }

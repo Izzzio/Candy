@@ -7,7 +7,7 @@
  * moment js required
  * @type {number}
  */
-'use strict'
+'use strict';
 const MESSAGE_MUTEX_TIMEOUT = 1000;
 const LATENCY_TIME = 100 * 1000; //time on obsolescence of message
 
@@ -26,7 +26,7 @@ class starwaveProtocol {
          */
         this._messageMutex = {};
 
-        this.starwaveCrypto = new StarwaveCrypto(this, this.candy.secretKeys);
+        //this.starwaveCrypto = new StarwaveCrypto(this, this.candy.secretKeys);
     }
 
     /**
@@ -71,8 +71,12 @@ class starwaveProtocol {
             this.candy.registerMessageHandler(message, function (messageBody) {
                 if(messageBody.id === message || message.length === 0) {
                     if(typeof  messageBody.mutex !== 'undefined' && typeof that._messageMutex[messageBody.mutex] === 'undefined') {
-                        handler(messageBody);
-                        that.handleMessageMutex(messageBody);
+                        if(handler(messageBody)) {
+                            that.handleMessageMutex(messageBody);
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
                 }
             });
@@ -223,7 +227,7 @@ class starwaveProtocol {
     handleMessage(message, messagesHandlers, ws) {
         if(message.type === this.candy.MessageType.SW_BROADCAST) {
             if(this.manageIncomingMessage(message) === 1) {
-                this.starwaveCrypto.handleIncomingMessage(message);
+                //this.starwaveCrypto.handleIncomingMessage(message);
                 //message is on the endpoint and we execute handlers
                 for (let a in messagesHandlers) {
                     if(messagesHandlers.hasOwnProperty(a)) {
@@ -281,11 +285,11 @@ class starwaveProtocol {
      * @param ws
      * @param message
      */
-    write (ws, message) {
+    write(ws, message) {
         try {
             ws.send(JSON.stringify(message))
         } catch (e) { //send error. it's possibly that socket is inactive
-            console.log('Send error: ' + e );
+            console.log('Send error: ' + e);
         }
     }
 
@@ -325,14 +329,14 @@ class starwaveProtocol {
         return false;
     }
 
-        /**
-         * Broadcast message
-         * @param message
-         * @param excludeIp
-         */
+    /**
+     * Broadcast message
+     * @param message
+     * @param excludeIp
+     */
     broadcast(message, excludeIp) {
         let i;
-        for (i = 0; i < this.candy.sockets.length; i++){
+        for (i = 0; i < this.candy.sockets.length; i++) {
             let socket = this.candy.sockets[i];
             if(typeof excludeIp === 'undefined' || socket !== excludeIp) {
                 this.write(socket, message);
@@ -348,28 +352,28 @@ class starwaveProtocol {
      * @param busAddress
      * @returns {number} //status of the operation
      */
-    preventMultipleSockets(socket){
+    preventMultipleSockets(socket) {
         let busAddress;
-        if (socket.nodeMetaInfo) {
+        if(socket.nodeMetaInfo) {
             busAddress = socket.nodeMetaInfo.messageBusAddress;
-            if (busAddress === undefined) {
+            if(busAddress === undefined) {
                 return 2; //socket without busAddress
             }
-        }else{
+        } else {
             return 3; //socket has no meta info
         }
         //if there are more than 1 socket on busaddress we close connection
         const sockets = this.getCurrentPeers(true);
         let socketsOnBus = 0;
         const socketsNumber = sockets.length;
-        for (let i = 0; i < socketsNumber; i++){
+        for (let i = 0; i < socketsNumber; i++) {
             if(sockets[i] && sockets[i].nodeMetaInfo) {
-                if (sockets[i].nodeMetaInfo.messageBusAddress === busAddress){
+                if(sockets[i].nodeMetaInfo.messageBusAddress === busAddress) {
                     socketsOnBus++;
                 }
             }
         }
-        if (socketsOnBus > 1) {
+        if(socketsOnBus > 1) {
             socket.close();
             return 0; //close connection
         } else {

@@ -453,7 +453,7 @@ function Candy(nodeList) {
      */
     this.registerMessageHandler = function (id, handler) {
         this.messagesHandlers.push({id: id, handle: handler});
-    }
+    };
 
 
     return this;
