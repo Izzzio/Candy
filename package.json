@@ -6,8 +6,8 @@
   "dependencies": {
     "cryptojs": "^2.5.3",
     "elliptic": "^6.4.1",
-    "forge": "^2.3.0",
     "moment": "^2.22.2",
+    "node-forge": "^0.7.6",
     "ws": "^6.0.0"
   },
   "devDependencies": {},
