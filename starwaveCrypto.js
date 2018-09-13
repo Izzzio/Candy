@@ -222,3 +222,8 @@ class StarwaveCrypto {
     }
 
 }
+
+//unify browser and node
+if (this.window === undefined){
+    module.exports = StarwaveCrypto;
+}

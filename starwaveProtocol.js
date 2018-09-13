@@ -383,3 +383,7 @@ class starwaveProtocol {
 
 }
 
+//unify browser and node
+if (this.window === undefined){
+    module.exports = starwaveProtocol;
+}
