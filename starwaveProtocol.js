@@ -11,7 +11,11 @@
 const MESSAGE_MUTEX_TIMEOUT = 1000;
 const LATENCY_TIME = 100 * 1000; //time on obsolescence of message
 
-//const moment = require('moment');
+
+//unify browser and node
+if (this.window === undefined){
+    const moment = require('moment');
+}
 
 class starwaveProtocol {
 
@@ -25,8 +29,6 @@ class starwaveProtocol {
          * @private
          */
         this._messageMutex = {};
-
-        //this.starwaveCrypto = new StarwaveCrypto(this, this.candy.secretKeys);
     }
 
     /**

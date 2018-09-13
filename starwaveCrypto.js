@@ -12,6 +12,12 @@
 
 'use strict';
 
+//unify browser and node
+if (this.window === undefined){
+    const elliptic = require('elliptic');
+    const CryptoJS = require('crypto-js');
+}
+
 const SWCRYPTO_CONNECTION_MESSAGE_TYPE = 'DH-CONNECTION';
 
 class StarwaveCrypto {

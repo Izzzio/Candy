@@ -10,6 +10,11 @@
 
 'use strict';
 
+//unify browser and node
+if (this.window === undefined){
+    const WebSocket = require('ws');
+}
+
 
 const MessageType = {
     QUERY_LATEST: 0,

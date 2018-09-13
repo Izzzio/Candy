@@ -7,6 +7,11 @@
 
 'use strict';
 
+//unify browser and node
+if (this.window === undefined){
+    const forge = require('node-forge');
+}
+
 
 function DigitalSignature(dataToSign) { //data in string format
 	
