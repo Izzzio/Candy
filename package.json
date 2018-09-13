@@ -1,0 +1,27 @@
+{
+  "name": "candy",
+  "version": "1.0.0",
+  "description": "iZ³ blockchain connection provider for browsers",
+  "main": "main.js",
+  "dependencies": {
+    "cryptojs": "^2.5.3",
+    "elliptic": "^6.4.1",
+    "forge": "^2.3.0",
+    "moment": "^2.22.2",
+    "ws": "^6.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Izzzio/Candy.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Izzzio/Candy/issues"
+  },
+  "homepage": "https://github.com/Izzzio/Candy#readme"
+}

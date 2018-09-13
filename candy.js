@@ -10,6 +10,7 @@
 
 'use strict';
 
+
 const MessageType = {
     QUERY_LATEST: 0,
     QUERY_ALL: 1,
@@ -25,6 +26,10 @@ const BlockchainRequestors = {
         limit = typeof limit === 'undefined' ? 1 : limit;
         return {'type': MessageType.QUERY_ALL, data: typeof fromIndex === 'undefined' ? 0 : fromIndex, limit: limit}
     }
+};
+
+if (this.window === undefined) {
+
 };
 
 function Candy(nodeList) {
@@ -53,7 +58,6 @@ function Candy(nodeList) {
     } else {
         console.log("Error: Can't find starwaveProtocol module");
     }
-    ;
 
     /**
      * Current reciever address. Override allowed
@@ -459,4 +463,8 @@ function Candy(nodeList) {
 
 
     return this;
+}
+
+if (this.window === undefined){
+    module.exports = Candy;
 }
