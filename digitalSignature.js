@@ -8,8 +8,11 @@
 'use strict';
 
 //unify browser and node
-if (this.window === undefined){
-    const forge = require('node-forge');
+if (typeof _this ==='undefined') {
+    var _this = this;
+}
+if (_this.window === undefined){
+    _this.forge = require('node-forge');
 }
 
 
@@ -40,11 +43,11 @@ function DigitalSignature(dataToSign) { //data in string format
      */
 	this.generate = (len = 2048) => {
 		
-        let rsa = forge.pki.rsa;
-        let keypair = forge.rsa.generateKeyPair({len});
+        let rsa = _this.forge.pki.rsa;
+        let keypair = _this.forge.rsa.generateKeyPair({len});
         keypair = {
-            public: repairKey(fix(forge.pki.publicKeyToRSAPublicKeyPem(keypair.publicKey, 72))),
-            private: repairKey(fix(forge.pki.privateKeyToPem(keypair.privateKey, 72)))
+            public: repairKey(fix(_this.forge.pki.publicKeyToRSAPublicKeyPem(keypair.publicKey, 72))),
+            private: repairKey(fix(_this.forge.pki.privateKeyToPem(keypair.privateKey, 72)))
         };
         this.keysPair = keypair;
         console.log('Info: Keypair generated');
@@ -80,12 +83,12 @@ function DigitalSignature(dataToSign) { //data in string format
 			console.log('No data to sign');
 			return '';
 		}
-        let md= forge.md.sha256.create();
+        let md= _this.forge.md.sha256.create();
         md.update(data,'utf8');
-        let privateKey = forge.pki.privateKeyFromPem(key); 
+        let privateKey = _this.forge.pki.privateKeyFromPem(key);
         this.sign = privateKey.sign(md); 
         console.log('Info: Data signed');
-		return {data: data, sign: forge.util.bytesToHex(this.sign)}; 
+		return {data: data, sign: _this.forge.util.bytesToHex(this.sign)};
 	};
 	
 	
@@ -101,10 +104,10 @@ function DigitalSignature(dataToSign) { //data in string format
             data = data.data;
         }
         try {
-            let publicKey = forge.pki.publicKeyFromPem(repairKey(fix(key)));
-            let md = forge.md.sha256.create();
+            let publicKey = _this.forge.pki.publicKeyFromPem(repairKey(fix(key)));
+            let md = _this.forge.md.sha256.create();
             md.update(data,'utf8');
-			return publicKey.verify(md.digest().bytes(), forge.util.hexToBytes(sign)); //verifying only in bytes format
+			return publicKey.verify(md.digest().bytes(), _this.forge.util.hexToBytes(sign)); //verifying only in bytes format
 		} catch (e){
 			console.log(e);
             return false;
