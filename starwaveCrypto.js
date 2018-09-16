@@ -26,9 +26,16 @@ const SWCRYPTO_CONNECTION_MESSAGE_TYPE = 'DH-CONNECTION';
 class StarwaveCrypto {
 
     constructor(starwaveProtocolObject, secretKeysKeyring, curve = 'secp256k1') {
+        if (_this.window === undefined){
+            this.elliptic = require('elliptic');
+            this.CryptoJS = require('crypto-js');
+        } else {
+            this.elliptic = elliptic;
+            this.CryptoJS = CryptoJS;
+        }
         let that = this;
         // EСDH object
-        this.ec = new _this.elliptic.ec(curve);
+        this.ec = new elliptic.ec(curve);
         this.keyObject = this.ec.genKeyPair();
         this.public = this.generateKeys();
         this.starwave = starwaveProtocolObject;
@@ -82,9 +89,9 @@ class StarwaveCrypto {
      * @returns {*}
      */
     cipherData(data, secret) {
-        let encrypted = _this.CryptoJS.AES.encrypt(data, secret).toString(); //base64
-        let b64 = _this.CryptoJS.enc.Base64.parse(encrypted);//object
-        encrypted = b64.toString(_this.CryptoJS.enc.Hex);//hex
+        let encrypted = CryptoJS.AES.encrypt(data, secret).toString(); //base64
+        let b64 = CryptoJS.enc.Base64.parse(encrypted);//object
+        encrypted = b64.toString(CryptoJS.enc.Hex);//hex
         return encrypted;
     }
 
@@ -98,10 +105,10 @@ class StarwaveCrypto {
         let data;
         try {
             //unpack from hex to native base64 and to object
-            let b64 = _this.CryptoJS.enc.Hex.parse(encryptedData);
-            let bytes = b64.toString(_this.CryptoJS.enc.Base64);
-            data = _this.CryptoJS.AES.decrypt(bytes, secret);
-            data = data.toString(_this.CryptoJS.enc.Utf8);
+            let b64 = CryptoJS.enc.Hex.parse(encryptedData);
+            let bytes = b64.toString(CryptoJS.enc.Base64);
+            data = CryptoJS.AES.decrypt(bytes, secret);
+            data = data.toString(CryptoJS.enc.Utf8);
         } catch (e) {
             console.log('Error decrypting data: ' + e)
         }

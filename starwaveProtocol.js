@@ -16,9 +16,7 @@ const LATENCY_TIME = 100 * 1000; //time on obsolescence of message
 if (typeof _this ==='undefined') {
     var _this = this;
 }
-if (_this.window === undefined){
-    _this.moment = require('moment');
-}
+
 
 class starwaveProtocol {
 
@@ -32,6 +30,11 @@ class starwaveProtocol {
          * @private
          */
         this._messageMutex = {};
+        if (_this.window === undefined){
+            this.moment = require('moment');
+        } else{
+            this.moment = moment;
+        }
     }
 
     /**
@@ -54,13 +57,13 @@ class starwaveProtocol {
             reciver: reciver,
             sender: sender !== undefined ? sender : this.candy.recieverAddress,
             id: id,
-            timestamp: timestamp !== undefined ? timestamp : _this.moment().utc().valueOf(),
+            timestamp: timestamp !== undefined ? timestamp : this.moment().utc().valueOf(),
             TTL: typeof TTL !== 'undefined' ? TTL : 0,
             mutex: this.candy.getid() + this.candy.getid() + this.candy.getid(),
             relevancyTime: relevancyTime !== undefined ? relevancyTime : LATENCY_TIME, //time of message's relevancy
             route: route !== undefined ? route : [],
             type: type !== undefined ? type : this.candy.MessageType.SW_BROADCAST,
-            timestampOfStart: timestampOfStart !== undefined ? timestampOfStart : _this.moment().utc().valueOf()
+            timestampOfStart: timestampOfStart !== undefined ? timestampOfStart : this.moment().utc().valueOf()
         };
     };
 
@@ -176,7 +179,7 @@ class starwaveProtocol {
         }
 
         //check if the message is't too old
-        let m = _this.moment().utc().valueOf();
+        let m = this.moment().utc().valueOf();
         if(m > (message.timestamp + message.relevancyTime + LATENCY_TIME)) {
             return 0; //do nothing
         }

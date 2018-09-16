@@ -14,14 +14,6 @@ if (typeof _this ==='undefined') {
     var _this = this;
 }
 
-if (_this.window === undefined) {
-    _this.WebSocket = require('ws');
-    _this.starwaveProtocol = require('./starwaveProtocol.js');
-    _this.NodeMetaInfo = require('./NodeMetaInfo.js');
-    _this.DigitalSignature = require('./digitalSignature.js');
-    _this.StarwaveCrypto = require('./starwaveCrypto.js');
-}
-
 const MessageType = {
     QUERY_LATEST: 0,
     QUERY_ALL: 1,
@@ -42,6 +34,25 @@ const BlockchainRequestors = {
 
 function Candy(nodeList) {
 
+    //modules list(for compability with node)
+    try {
+        if (_this.window === undefined) {
+            this.WebSocket = require('ws');
+            this.starwaveProtocol = require('./starwaveProtocol.js');
+            this.NodeMetaInfo = require('./NodeMetaInfo.js');
+            this.DigitalSignature = require('./digitalSignature.js');
+            this.StarwaveCrypto = require('./starwaveCrypto.js');
+        } else { //if browser
+            this.WebSocket = typeof WebSocket !== 'undefined' ? WebSocket : undefined;
+            this.starwaveProtocol = typeof starwaveProtocol !== 'undefined' ? starwaveProtocol : undefined;
+            this.NodeMetaInfo = typeof NodeMetaInfo !== 'undefined' ? NodeMetaInfo : undefined;
+            this.DigitalSignature = typeof DigitalSignature !== 'undefined' ? DigitalSignature : undefined;
+            this.StarwaveCrypto = typeof StarwaveCrypto !== 'undefined' ? StarwaveCrypto : undefined;
+        }
+    } catch (e) {
+        console.log('Error trying to include libraries: ' + e);
+    }
+
     let that = this;
     this.maxConnections = 30;
     this.nodeList = nodeList;
@@ -60,11 +71,8 @@ function Candy(nodeList) {
 
     this.secretKeys = {}; //consist of secret keys of different busAddresses of peers
 
-    //modules list(for compability with node)
-
-
-    if (typeof _this.starwaveProtocol === 'function') {
-        this.starwave = new _this.starwaveProtocol(this, MessageType);
+    if (typeof this.starwaveProtocol === 'function') {
+        this.starwave = new this.starwaveProtocol(this, MessageType);
     } else {
         console.log("Error: Can't find starwaveProtocol module");
     }
@@ -105,7 +113,6 @@ function Candy(nodeList) {
      * @param {Object} data
      */
     this._dataRecieved = function (source, data) {
-        console.log(data);
         //prevent multiple sockets on one busaddress
         if (!this.allowMultiplySocketsOnBus && (this.starwave)) {
             if (this.starwave.preventMultipleSockets(source) === 0) {
@@ -213,7 +220,7 @@ function Candy(nodeList) {
         let activeSockets = [];
         for (let a in that.sockets) {
             if (that.sockets[a]) {
-                if (that.sockets[a].readyState === _this.WebSocket.OPEN) {
+                if (that.sockets[a].readyState === this.WebSocket.OPEN) {
                     activeSockets.push(that.sockets[a]);
                 }
             }
@@ -229,7 +236,7 @@ function Candy(nodeList) {
     this.connectPeer = function (peer) {
         let socket = null;
         try {
-            socket = new _this.WebSocket(peer);
+            socket = new this.WebSocket(peer);
         } catch (e) {
             return;
         }
@@ -363,8 +370,7 @@ function Candy(nodeList) {
      * @param {int} timeout
      */
     this._candyAppRequest = function (uri, requestData, backId, timeout) {
-        let url = document.createElement('a');
-        url.href = uri.replace('candy:', 'http:');
+        let url = new URL(uri.replace('candy:', 'http:'));
         let data = {
             uri: uri,
             data: requestData,
@@ -432,8 +438,7 @@ function Candy(nodeList) {
      * @param {int} timeout
      */
     this.request = function (uri, data, callback, timeout) {
-        let url = document.createElement('a');
-        url.href = uri.replace('candy:', 'http:');
+        let url = new URL(uri.replace('candy:', 'http:'));
         if (url.hostname === 'block') {
             that.loadResource(url.pathname.replace('/', ''), function (err, data) {
                 callback(err, data.candyData, data);
