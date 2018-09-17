@@ -42,12 +42,14 @@ function Candy(nodeList) {
             this.NodeMetaInfo = require('./NodeMetaInfo.js');
             this.DigitalSignature = require('./digitalSignature.js');
             this.StarwaveCrypto = require('./starwaveCrypto.js');
+            this.URL = require('url').Url;
         } else { //if browser
             this.WebSocket = typeof WebSocket !== 'undefined' ? WebSocket : undefined;
             this.starwaveProtocol = typeof starwaveProtocol !== 'undefined' ? starwaveProtocol : undefined;
             this.NodeMetaInfo = typeof NodeMetaInfo !== 'undefined' ? NodeMetaInfo : undefined;
             this.DigitalSignature = typeof DigitalSignature !== 'undefined' ? DigitalSignature : undefined;
             this.StarwaveCrypto = typeof StarwaveCrypto !== 'undefined' ? StarwaveCrypto : undefined;
+            this.URL = URL;
         }
     } catch (e) {
         console.log('Error trying to include libraries: ' + e);
@@ -191,10 +193,10 @@ function Candy(nodeList) {
 
         //add meta info handling //required NodeMetaInfo.js included
         if (data.type === MessageType.META) {
-            if (typeof NodeMetaInfo === 'function') {
+            if (typeof this.NodeMetaInfo === 'function') {
                 let ind = that.sockets.indexOf(source);
                 if (ind > -1) {
-                    that.sockets[ind].nodeMetaInfo = (new NodeMetaInfo()).parse(data.data);
+                    that.sockets[ind].nodeMetaInfo = (new this.NodeMetaInfo()).parse(data.data);
                 } else {
                     console.log('Error: Unexpected error occurred when trying to add validators');
                 }
@@ -240,6 +242,7 @@ function Candy(nodeList) {
         } catch (e) {
             return;
         }
+
         socket.onopen = function () {
             setTimeout(function () {
                 if (typeof that.onready !== 'undefined') {
@@ -269,6 +272,12 @@ function Candy(nodeList) {
         socket.onerror = function (error) {
             //console.log("Ошибка " + error.message);
         };
+        if (_this.window === undefined){
+            socket.on('open', ()=> socket.onopen());
+            socket.on('close', ()=> socket.onclose());
+            socket.on('message', ()=> socket.onmessage());
+            socket.on('error', ()=> socket.onerror());
+        }
         that.sockets.push(socket);
     };
 
@@ -370,7 +379,7 @@ function Candy(nodeList) {
      * @param {int} timeout
      */
     this._candyAppRequest = function (uri, requestData, backId, timeout) {
-        let url = new URL(uri.replace('candy:', 'http:'));
+        let url = new this.URL(uri.replace('candy:', 'http:'));
         let data = {
             uri: uri,
             data: requestData,
@@ -438,7 +447,7 @@ function Candy(nodeList) {
      * @param {int} timeout
      */
     this.request = function (uri, data, callback, timeout) {
-        let url = new URL(uri.replace('candy:', 'http:'));
+        let url = new this.URL(uri.replace('candy:', 'http:'));
         if (url.hostname === 'block') {
             that.loadResource(url.pathname.replace('/', ''), function (err, data) {
                 callback(err, data.candyData, data);
@@ -475,7 +484,6 @@ function Candy(nodeList) {
         this.messagesHandlers.push({id: id, handle: handler});
         this.messagesHandlers.sort((a, b) => a.id > b.id);
     };
-
 
     return this;
 }
