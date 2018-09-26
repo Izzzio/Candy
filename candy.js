@@ -9,6 +9,10 @@
  */
 
 'use strict';
+//unify browser and node
+if (typeof _this ==='undefined') {
+    var _this = this;
+}
 
 const MessageType = {
     QUERY_LATEST: 0,
@@ -27,8 +31,30 @@ const BlockchainRequestors = {
     }
 };
 
+
 function Candy(nodeList) {
-    'use strict';
+
+    //modules list(for compability with node)
+    try {
+        if (_this.window === undefined) {
+            this.WebSocket = require('ws');
+            this.starwaveProtocol = require('./starwaveProtocol.js');
+            this.NodeMetaInfo = require('./NodeMetaInfo.js');
+            this.DigitalSignature = require('./digitalSignature.js');
+            this.StarwaveCrypto = require('./starwaveCrypto.js');
+            this.URL = require('url').Url;
+        } else { //if browser
+            this.WebSocket = typeof WebSocket !== 'undefined' ? WebSocket : undefined;
+            this.starwaveProtocol = typeof starwaveProtocol !== 'undefined' ? starwaveProtocol : undefined;
+            this.NodeMetaInfo = typeof NodeMetaInfo !== 'undefined' ? NodeMetaInfo : undefined;
+            this.DigitalSignature = typeof DigitalSignature !== 'undefined' ? DigitalSignature : undefined;
+            this.StarwaveCrypto = typeof StarwaveCrypto !== 'undefined' ? StarwaveCrypto : undefined;
+            this.URL = URL;
+        }
+    } catch (e) {
+        console.log('Error trying to include libraries: ' + e);
+    }
+
     let that = this;
     this.maxConnections = 30;
     this.nodeList = nodeList;
@@ -47,13 +73,11 @@ function Candy(nodeList) {
 
     this.secretKeys = {}; //consist of secret keys of different busAddresses of peers
 
-
-    if(typeof starwaveProtocol === 'function') {
-        this.starwave = new starwaveProtocol(this, MessageType);
+    if (typeof this.starwaveProtocol === 'function') {
+        this.starwave = new this.starwaveProtocol(this, MessageType);
     } else {
         console.log("Error: Can't find starwaveProtocol module");
     }
-    ;
 
     /**
      * Current reciever address. Override allowed
@@ -91,23 +115,22 @@ function Candy(nodeList) {
      * @param {Object} data
      */
     this._dataRecieved = function (source, data) {
-
         //prevent multiple sockets on one busaddress
-        if(!this.allowMultiplySocketsOnBus && (this.starwave)) {
-            if(this.starwave.preventMultipleSockets(source) === 0) {
+        if (!this.allowMultiplySocketsOnBus && (this.starwave)) {
+            if (this.starwave.preventMultipleSockets(source) === 0) {
                 data = null;
                 return;
             }
         }
 
-        if(typeof that.ondata === 'function') {
-            if(that.ondata(data)) {
+        if (typeof that.ondata === 'function') {
+            if (that.ondata(data)) {
                 return;
             }
         }
 
         //Data block recived
-        if(data.type === MessageType.RESPONSE_BLOCKCHAIN) {
+        if (data.type === MessageType.RESPONSE_BLOCKCHAIN) {
             try {
                 /**
                  * @var {Block} block
@@ -115,11 +138,11 @@ function Candy(nodeList) {
                 let blocks = JSON.parse(data.data);
                 for (let a in blocks) {
                     let block = blocks[a];
-                    if(that.blockHeight < block.index) {
+                    if (that.blockHeight < block.index) {
                         that.blockHeight = block.index
                     }
                     //Loading requested resource
-                    if(typeof that._resourceQueue[block.index] !== 'undefined') {
+                    if (typeof that._resourceQueue[block.index] !== 'undefined') {
                         that._resourceQueue[block.index](block.data, block);
                         that._resourceQueue[block.index] = undefined;
                     }
@@ -130,12 +153,12 @@ function Candy(nodeList) {
         }
 
         //New peers recived
-        if(data.type === MessageType.MY_PEERS) {
+        if (data.type === MessageType.MY_PEERS) {
             for (let a in data.data) {
-                if(data.data.hasOwnProperty(a)) {
-                    if(that.nodeList.indexOf(data.data[a]) == -1) {
+                if (data.data.hasOwnProperty(a)) {
+                    if (that.nodeList.indexOf(data.data[a]) == -1) {
                         that.nodeList.push(data.data[a]);
-                        if(that.getActiveConnections().length < that.maxConnections - 1) {
+                        if (that.getActiveConnections().length < that.maxConnections - 1) {
                             that.connectPeer(data.data[a]);
                         }
                     }
@@ -144,21 +167,21 @@ function Candy(nodeList) {
             that.nodeList = Array.from(new Set(that.nodeList));
         }
 
-        if(data.type === MessageType.BROADCAST) {
+        if (data.type === MessageType.BROADCAST) {
             /*if(that._lastMsgIndex < data.index) {*/
-            if(data.reciver === that.recieverAddress) {
+            if (data.reciver === that.recieverAddress) {
 
-                if(data.id === 'CANDY_APP_RESPONSE') {
-                    if(typeof that._candyAppResponse === 'function') {
+                if (data.id === 'CANDY_APP_RESPONSE') {
+                    if (typeof that._candyAppResponse === 'function') {
                         that._candyAppResponse(data);
                     }
                 } else {
-                    if(typeof that.onmessage === 'function') {
+                    if (typeof that.onmessage === 'function') {
                         that.onmessage(data);
                     }
                 }
             } else {
-                if(data.recepient !== that.recieverAddress) {
+                if (data.recepient !== that.recieverAddress) {
                     data.TTL++;
                     that.broadcast(data);
                 }
@@ -169,11 +192,11 @@ function Candy(nodeList) {
         }
 
         //add meta info handling //required NodeMetaInfo.js included
-        if(data.type === MessageType.META) {
-            if(typeof NodeMetaInfo === 'function') {
+        if (data.type === MessageType.META) {
+            if (typeof this.NodeMetaInfo === 'function') {
                 let ind = that.sockets.indexOf(source);
-                if(ind > -1) {
-                    that.sockets[ind].nodeMetaInfo = (new NodeMetaInfo()).parse(data.data);
+                if (ind > -1) {
+                    that.sockets[ind].nodeMetaInfo = (new this.NodeMetaInfo()).parse(data.data);
                 } else {
                     console.log('Error: Unexpected error occurred when trying to add validators');
                 }
@@ -182,8 +205,8 @@ function Candy(nodeList) {
             }
         }
 
-        if(data.type === MessageType.SW_BROADCAST) {
-            if(this.starwave) {
+        if (data.type === MessageType.SW_BROADCAST) {
+            if (this.starwave) {
                 this._lastMsgIndex = this.starwave.handleMessage(data, this.messagesHandlers, source);
             }
         }
@@ -198,8 +221,8 @@ function Candy(nodeList) {
     that.getActiveConnections = function () {
         let activeSockets = [];
         for (let a in that.sockets) {
-            if(that.sockets[a]) {
-                if(that.sockets[a].readyState === WebSocket.OPEN) {
+            if (that.sockets[a]) {
+                if (that.sockets[a].readyState === this.WebSocket.OPEN) {
                     activeSockets.push(that.sockets[a]);
                 }
             }
@@ -215,14 +238,15 @@ function Candy(nodeList) {
     this.connectPeer = function (peer) {
         let socket = null;
         try {
-            socket = new WebSocket(peer);
+            socket = new this.WebSocket(peer);
         } catch (e) {
             return;
         }
+
         socket.onopen = function () {
             setTimeout(function () {
-                if(typeof that.onready !== 'undefined') {
-                    if(typeof  that._autoloader !== 'undefined') {
+                if (typeof that.onready !== 'undefined') {
+                    if (typeof  that._autoloader !== 'undefined') {
                         that._autoloader.onready();
                     }
                     that.onready();
@@ -248,6 +272,12 @@ function Candy(nodeList) {
         socket.onerror = function (error) {
             //console.log("Ошибка " + error.message);
         };
+        if (_this.window === undefined){
+            socket.on('open', ()=> socket.onopen());
+            socket.on('close', ()=> socket.onclose());
+            socket.on('message', ()=> socket.onmessage());
+            socket.on('error', ()=> socket.onerror());
+        }
         that.sockets.push(socket);
     };
 
@@ -258,11 +288,11 @@ function Candy(nodeList) {
      */
     this.broadcast = function (message) {
         let sended = false;
-        if(typeof message !== 'string') {
+        if (typeof message !== 'string') {
             message = JSON.stringify(message);
         }
         for (let a in that.sockets) {
-            if(that.sockets.hasOwnProperty(a) && that.sockets[a] !== null) {
+            if (that.sockets.hasOwnProperty(a) && that.sockets[a] !== null) {
                 try {
                     that.sockets[a].send(message);
                     sended = true;
@@ -295,7 +325,7 @@ function Candy(nodeList) {
             index: that._lastMsgIndex,
             mutex: this.getid() + this.getid() + this.getid()
         };
-        if(!that.broadcast(message)) {
+        if (!that.broadcast(message)) {
             that.autoconnect(true);
             return false;
         }
@@ -308,10 +338,10 @@ function Candy(nodeList) {
      * @param {boolean} force reconnection
      */
     this.autoconnect = function (force) {
-        if(that.getActiveConnections().length < 1 || force) {
+        if (that.getActiveConnections().length < 1 || force) {
             for (let a in that.nodeList) {
-                if(that.nodeList.hasOwnProperty(a)) {
-                    if(that.getActiveConnections().length < that.maxConnections - 1) {
+                if (that.nodeList.hasOwnProperty(a)) {
+                    if (that.getActiveConnections().length < that.maxConnections - 1) {
                         that.connectPeer(that.nodeList[a]);
                     }
                 }
@@ -327,8 +357,8 @@ function Candy(nodeList) {
      */
     this.start = function () {
         for (let a in that.nodeList) {
-            if(that.nodeList.hasOwnProperty(a)) {
-                if(that.getActiveConnections().length < that.maxConnections - 1) {
+            if (that.nodeList.hasOwnProperty(a)) {
+                if (that.getActiveConnections().length < that.maxConnections - 1) {
                     that.connectPeer(that.nodeList[a]);
                 }
             }
@@ -349,8 +379,7 @@ function Candy(nodeList) {
      * @param {int} timeout
      */
     this._candyAppRequest = function (uri, requestData, backId, timeout) {
-        let url = document.createElement('a');
-        url.href = uri.replace('candy:', 'http:');
+        let url = new this.URL(uri.replace('candy:', 'http:'));
         let data = {
             uri: uri,
             data: requestData,
@@ -365,7 +394,7 @@ function Candy(nodeList) {
      * @param message
      */
     this._candyAppResponse = function (message) {
-        if(typeof that._requestQueue[message.data.backId] !== 'undefined') {
+        if (typeof that._requestQueue[message.data.backId] !== 'undefined') {
             let request = that._requestQueue[message.data.backId];
             clearTimeout(request.timer);
             request.callback(message.err, typeof message.data.data.body !== 'undefined' ? message.data.data.body : message.data.data, message);
@@ -383,7 +412,7 @@ function Candy(nodeList) {
      * @param {int} timeout
      */
     this.requestApp = function (uri, data, callback, timeout) {
-        if(typeof timeout === 'undefined') {
+        if (typeof timeout === 'undefined') {
             timeout = 10000;
         }
         let requestId = that.getid();
@@ -418,9 +447,8 @@ function Candy(nodeList) {
      * @param {int} timeout
      */
     this.request = function (uri, data, callback, timeout) {
-        let url = document.createElement('a');
-        url.href = uri.replace('candy:', 'http:');
-        if(url.hostname === 'block') {
+        let url = new this.URL(uri.replace('candy:', 'http:'));
+        if (url.hostname === 'block') {
             that.loadResource(url.pathname.replace('/', ''), function (err, data) {
                 callback(err, data.candyData, data);
             });
@@ -436,7 +464,7 @@ function Candy(nodeList) {
      * @param {Function} callback
      */
     this.loadResource = function (blockId, callback) {
-        if(blockId > that.blockHeigth && blockId < 1) {
+        if (blockId > that.blockHeigth && blockId < 1) {
             callback(404);
         }
         that._resourceQueue[blockId] = function (data, rawBlock) {
@@ -457,6 +485,9 @@ function Candy(nodeList) {
         this.messagesHandlers.sort((a, b) => a.id > b.id);
     };
 
-
     return this;
+}
+
+if (this.window === undefined) {
+    module.exports = Candy;
 }

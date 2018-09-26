@@ -7,9 +7,18 @@
 
 'use strict';
 
+//unify browser and node
+if (typeof _this ==='undefined') {
+    var _this = this;
+}
 
 function DigitalSignature(dataToSign) { //data in string format
-	
+    if (_this.window === undefined){
+        this.forge = require('node-forge');
+    } else {
+        this.forge = forge;
+    }
+
 	/**
      * RSA keys for sign
      */
@@ -19,7 +28,7 @@ function DigitalSignature(dataToSign) { //data in string format
      * Sign
      */
 	this.sign = '';
-    
+
 	/**
      * data format as presented in 'block data'
      */
@@ -35,11 +44,11 @@ function DigitalSignature(dataToSign) { //data in string format
      */
 	this.generate = (len = 2048) => {
 		
-        let rsa = forge.pki.rsa;
-        let keypair = forge.rsa.generateKeyPair({len});
+        let rsa = this.forge.pki.rsa;
+        let keypair = this.forge.rsa.generateKeyPair({len});
         keypair = {
-            public: repairKey(fix(forge.pki.publicKeyToRSAPublicKeyPem(keypair.publicKey, 72))),
-            private: repairKey(fix(forge.pki.privateKeyToPem(keypair.privateKey, 72)))
+            public: repairKey(fix(this.forge.pki.publicKeyToRSAPublicKeyPem(keypair.publicKey, 72))),
+            private: repairKey(fix(this.forge.pki.privateKeyToPem(keypair.privateKey, 72)))
         };
         this.keysPair = keypair;
         console.log('Info: Keypair generated');
@@ -66,7 +75,7 @@ function DigitalSignature(dataToSign) { //data in string format
 	/**
      * Signs data
 	 * @param {data} data for signing
-	 * @param {privateKey} private key
+	 * @param {key} key
      */
     
     
@@ -74,35 +83,36 @@ function DigitalSignature(dataToSign) { //data in string format
 		if (!data) {
 			console.log('No data to sign');
 			return '';
-		};
-        let md= forge.md.sha256.create();
+		}
+        let md= this.forge.md.sha256.create();
         md.update(data,'utf8');
-        let privateKey = forge.pki.privateKeyFromPem(key); 
+        let privateKey = this.forge.pki.privateKeyFromPem(key);
         this.sign = privateKey.sign(md); 
         console.log('Info: Data signed');
-		return {data: data, sign: forge.util.bytesToHex(this.sign)}; 
+		return {data: data, sign: this.forge.util.bytesToHex(this.sign)};
 	};
 	
 	
 	/**
      * Signs data
 	 * @param {data} data for signing
-	 * @param {puBkey} private key
+     * @param {sign} sign
+	 * @param {key} key
      */
 	this.verifyData = (data = this.signedData, sign = this.signedData.sign, key = this.signedData.pubkey) => {
 		if (typeof data === 'object'){
             sign = data.sign;
             data = data.data;
-        };
+        }
         try {
-            let publicKey = forge.pki.publicKeyFromPem(repairKey(fix(key)));
-            let md = forge.md.sha256.create();
+            let publicKey = this.forge.pki.publicKeyFromPem(repairKey(fix(key)));
+            let md = this.forge.md.sha256.create();
             md.update(data,'utf8');
-			return publicKey.verify(md.digest().bytes(), forge.util.hexToBytes(sign)); //verifying only in bytes format
+			return publicKey.verify(md.digest().bytes(), this.forge.util.hexToBytes(sign)); //verifying only in bytes format
 		} catch (e){
 			console.log(e);
             return false;
-		};
+		}
 	};
 	
 	if (dataToSign !== undefined){
@@ -112,7 +122,12 @@ function DigitalSignature(dataToSign) { //data in string format
         if(this.verifyData() === false) {
             console.log('Sign self-validation error! Invalid key or sign checking');
         }
-	};
+	}
 	
 	return this;
-};
+}
+
+//unify browser and node
+if (this.window === undefined){
+    module.exports = DigitalSignature;
+}

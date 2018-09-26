@@ -63,3 +63,9 @@ class NodeMetaInfo {
     }
 
 }
+
+
+//unify browser and node
+if (this.window === undefined){
+    module.exports = NodeMetaInfo;
+}

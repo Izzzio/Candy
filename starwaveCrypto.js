@@ -12,11 +12,27 @@
 
 'use strict';
 
+//unify browser and node
+if (typeof _this ==='undefined') {
+    var _this = this;
+}
+if (_this.window === undefined){
+    _this.elliptic = require('elliptic');
+    _this.CryptoJS = require('crypto-js');
+}
+
 const SWCRYPTO_CONNECTION_MESSAGE_TYPE = 'DH-CONNECTION';
 
 class StarwaveCrypto {
 
     constructor(starwaveProtocolObject, secretKeysKeyring, curve = 'secp256k1') {
+        if (_this.window === undefined){
+            this.elliptic = require('elliptic');
+            this.CryptoJS = require('crypto-js');
+        } else {
+            this.elliptic = elliptic;
+            this.CryptoJS = CryptoJS;
+        }
         let that = this;
         // EСDH object
         this.ec = new elliptic.ec(curve);
@@ -221,4 +237,9 @@ class StarwaveCrypto {
         }
     }
 
+}
+
+//unify browser and node
+if (this.window === undefined){
+    module.exports = StarwaveCrypto;
 }
