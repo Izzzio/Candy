@@ -28,7 +28,7 @@ class TransactionCollector {
     createMessage(data, index = ''){
         let JSONdata = JSON.stringify(data);
         return {
-            type: this.blockchain.messageType.TRANS_COLL,
+            type: this.candy.MessageType.TRANS_COLL,
             data: JSONdata,
             index:index
         }
