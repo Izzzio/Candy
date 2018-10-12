@@ -30,7 +30,15 @@
  * 
  */
 
-const GostRandom = require('./gostRandom');
+//unify browser and node
+if (typeof _this ==='undefined') {
+    var _this = this;
+}
+
+if (_this.window === undefined) {
+    _this.GostRandom = require('./gostRandom');
+}
+
 
 let gostFunctionForCipher = (function () {
 

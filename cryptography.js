@@ -19,6 +19,10 @@ if (_this.window === undefined) {
     _this.CryptoJS = require('crypto-js');
     _this.GostCoding = require('./GOSTModules/gostCoding');
     _this.GostDigest = require('./GOSTModules/gostDigest');
+    _this.CryptoJS = require('crypto-js');
+} else {
+    _this.GostDigest =  _this.GostDigest ?  _this.GostDigest : gostFunctionForDigest;
+    _this.GostCoding = _this.GostCoding ? _this.GostCoding : gostFunctionForCoding;
 }
 
 const inputOutputFormat = 'hex';
@@ -62,12 +66,13 @@ class Cryptography {
             }
             //проверяем параметры хэша
             if (ha !== {}) {
-                this.gostDigest = new GostDigest(ha);
+                this.gostDigest = new _this.GostDigest(ha);
             }
             //проверяем параметры подписи и ключей
             if (sa !== {}) {
-                this.gostSign = new GostSign(sa);
+                this.gostSign = new _this.GostSign(sa);
             }
+            this.gostCoding = new _this.GostCoding();
 
         }
     }
@@ -177,4 +182,6 @@ class Cryptography {
     }
 }
 
-module.exports = Cryptography;
+if (this.window === undefined) {
+    module.exports = Cryptography;
+}

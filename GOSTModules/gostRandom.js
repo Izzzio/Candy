@@ -126,5 +126,8 @@ let gostFunctionForRandom = (function () {
     return GostRandom;
 
 })();
-module.exports = gostFunctionForRandom;
+
+if (this.window === undefined) {
+    module.exports = gostFunctionForRandom;
+}
 

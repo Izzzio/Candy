@@ -34,6 +34,16 @@
  * 
  */
 const GostRandom = require('./gostRandom');
+//unify browser and node
+if (typeof _this ==='undefined') {
+    var _this = this;
+}
+
+if (_this.window === undefined) {
+    _this.GostRandom = require('./gostRandom');
+} else {
+    _this.GostRandom =  _this.GostRandom ? _this.GostRandom : gostFunctionForRandom;
+}
 
 let gostFunctionForDigest = (function () {
 
@@ -1258,4 +1268,6 @@ let gostFunctionForDigest = (function () {
 
 })();
 
-module.exports = gostFunctionForDigest;
+if (this.window === undefined) {
+    module.exports = gostFunctionForDigest;
+}
