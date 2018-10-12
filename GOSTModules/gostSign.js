@@ -35,7 +35,18 @@
 
 const GostRandom = require('./gostRandom');
 const GostDigest = require('./gostDigest');
-const GostCoding = require('./gostCoding');
+//unify browser and node
+if (typeof _this ==='undefined') {
+    var _this = this;
+}
+
+if (_this.window === undefined) {
+    _this.GostDigest = require('./gostDigest');
+    _this.GostRandom = require('./gostRandom')
+} else {
+    _this.GostDigest =  _this.GostDigest ?  _this.GostDigest : gostFunctionForDigest;
+    _this.GostRandom =  _this.GostRandom ? _this.GostRandom : gostFunctionForRandom;
+}
 
 let gostFunctionsForSign = (function () {
 
@@ -2022,34 +2033,6 @@ let gostFunctionsForSign = (function () {
 
 })();
 
-module.exports = gostFunctionsForSign;
-
-// let gs = new gostFunctionsForSign({hash: "GOST R 34.11"});
-// let data = Buffer.from('123');
-// let k = gs.generateKey();
-// let s = gs.sign(k.privateKey, data);
-// console.log(gs.verify(k.publicKey, s, data));
-
-   // hash:{
-     //   keySize: 32,
-     //   length: 256,
-     //   mode: "HASH",
-      //  name: "GOST R 34.11",
-     //   procreator: '',
-     //   version: 2012
-    //},
- //   hash: "GOST R 34.11",
- //   name: "GOST R 34.10",
-//    version: 2012,
-//    mode: "SIGN",
- //   length: 512,
-  //  procreator: "",
- //   keySize: 32,
- //   namedCurve: "T-512-A"
-//    namedCurve: "S-256-A"
-
-
-
-
-
-
+if (this.window === undefined) {
+    module.exports = gostFunctionsForSign;
+}

@@ -1159,4 +1159,6 @@ let gostCodingFunction = (function () {
 
 })();
 
-module.exports = gostCodingFunction;
+if (this.window === undefined) {
+    module.exports = gostCodingFunction;
+}

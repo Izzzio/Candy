@@ -106,8 +106,8 @@ let gostFunctionForDigest = (function () {
 
     // Random seed
     function getSeed(length) {
-        GostRandom = GostRandom || root.GostRandom;
-        var randomSource = GostRandom ? new (GostRandom || root.GostRandom) : rootCrypto;
+        _this.GostRandom = _this.GostRandom || root.GostRandom;
+        var randomSource = _this.GostRandom ? new (_this.GostRandom || root.GostRandom) : rootCrypto;
         if (randomSource.getRandomValues) {
             var d = new Uint8Array(Math.ceil(length / 8));
             randomSource.getRandomValues(d);

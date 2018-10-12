@@ -17,12 +17,15 @@ if (typeof _this ==='undefined') {
 if (_this.window === undefined) {
     _this.DigitalSignature = require('./digitalSignature');
     _this.CryptoJS = require('crypto-js');
-    _this.GostCoding = require('./GOSTModules/gostCoding');
+    _this.coding = new (require('./GOSTModules/gostCoding'))();
     _this.GostDigest = require('./GOSTModules/gostDigest');
     _this.CryptoJS = require('crypto-js');
+    _this.GostSign = require('./GOSTModules/gostSign');
 } else {
     _this.GostDigest =  _this.GostDigest ?  _this.GostDigest : gostFunctionForDigest;
-    _this.GostCoding = _this.GostCoding ? _this.GostCoding : gostFunctionForCoding;
+    _this.coding = _this.coding ? _this.coding : gostFunctionForCoding;
+    _this.CryptoJS = _this.CryptoJS ? _this.CryptoJS : CryptoJS;
+    _this.GostSign = _this.GostSign ? _this.GostSign : gostFunctionForSign;
 }
 
 const inputOutputFormat = 'hex';
@@ -43,17 +46,17 @@ class Cryptography {
     constructor(config){
         if (!config){
         } else {
-            let ha = {};
+            let ha = null;
             //настраиваем хэш
             switch (config.hashFunction) {
                 case 'STRIBOG':
-                    ha.length = 256;
+                    ha = {length: 256};
                     break;
                 case 'STRIBOG512':
-                    ha.length = 512;
+                    ha.length = {length: 256};
                     break;
             }
-            let sa = {};
+            let sa = null;
 
             //настраиваем подпись
             switch (config.signFunction) {
@@ -65,15 +68,15 @@ class Cryptography {
                     break;
             }
             //проверяем параметры хэша
-            if (ha !== {}) {
+            if (ha !== null) {
                 this.gostDigest = new _this.GostDigest(ha);
             }
             //проверяем параметры подписи и ключей
-            if (sa !== {}) {
+            if (sa !== null) {
                 this.gostSign = new _this.GostSign(sa);
+            } else {
+                this.digitalSignature = new DigitalSignature();
             }
-            this.gostCoding = new _this.GostCoding();
-
         }
     }
 
@@ -85,9 +88,12 @@ class Cryptography {
     static data2Buffer(data) {
         let bData;
         try{
-            bData = Buffer.from(data);
+            //bData = Buffer.from(data);
+            bData = _this.coding.Chars.decode(data);
+
         } catch (e) {
-            bData = Buffer.from(JSON.stringify(data));
+           // bData = Buffer.from(JSON.stringify(data));
+            bData = _this.coding.Chars.decode(JSON.stringify(data));
         }
         return bData;
     }
@@ -101,8 +107,8 @@ class Cryptography {
         if (this.gostSign) {
             keyPair = this.gostSign.generateKey();
             //конвертируем в формат
-            keyPair.public = Buffer.from(keyPair.publicKey).toString(inputOutputFormat);
-            keyPair.private = Buffer.from(keyPair.privateKey).toString(inputOutputFormat);
+            keyPair.public = _this.coding.Hex.encode(keyPair.publicKey);
+            keyPair.private = _this.coding.Hex.encode(keyPair.privateKey);
         } else {
             keyPair = keypair({bits: 2048});
             keyPair.private = repairKey(keyPair.private);
@@ -123,15 +129,15 @@ class Cryptography {
             let bData, bKey;
             //prepare data for processing
             bData = Cryptography.data2Buffer(data);
-            bKey = Buffer.from(key, inputOutputFormat);
+            bKey = _this.coding.Hex.decode(key);
 
             signedData = this.gostSign.sign(bKey, bData);
-            signedData = Buffer.from(signedData).toString(inputOutputFormat);
+            signedData = _this.coding.Hex.encode(signedData);
         } else {
             key = repairKey(key);
             const _sign = crypto.createSign(SIGN_TYPE);
             _sign.update(data);
-            signedData = _sign.sign(key).toString(inputOutputFormat);
+            signedData = _sign.sign(key).toString('hex');
         }
         return {data: data, sign: signedData};
     }
@@ -152,9 +158,8 @@ class Cryptography {
         if (this.gostSign) {
             let bData, bKey, bSign;
             bData = Cryptography.data2Buffer(data);
-            bKey = Buffer.from(key, inputOutputFormat);
-            bSign = Buffer.from(sign, inputOutputFormat);
-
+            bKey = _this.coding.Hex.decode(key);
+            bSign = _this.coding.Hex.decode(sign);
             result = this.gostSign.verify(bKey, bSign, bData);
         } else {
             const verify = crypto.createVerify(SIGN_TYPE);
@@ -175,10 +180,10 @@ class Cryptography {
         if (this.gostDigest) {
             hashBuffer = this.gostDigest.digest(bData);
         } else {
-            hashBuffer = CryptoJS.SHA256(data).toString();
-            hashBuffer = Buffer.from(hashBuffer,'hex'); //make output independent to hash function type
+            hashBuffer = _this.CryptoJS.SHA256(data).toString();
+            hashBuffer = _this.coding.Hex.decode(hashBuffer); //make output independent to hash function type
         }
-        return Buffer.from(hashBuffer).toString(inputOutputFormat);
+        return _this.coding.Hex.encode(hashBuffer);
     }
 }
 
