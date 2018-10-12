@@ -30,7 +30,7 @@
  * 
  */
 
-let gostCodingFunction = (function () {
+let gostFunctionForCoding = (function () {
 
     /**
      * The Coding interface provides string converting methods: Base64, Hex, 
@@ -1160,5 +1160,5 @@ let gostCodingFunction = (function () {
 })();
 
 if (this.window === undefined) {
-    module.exports = gostCodingFunction;
+    module.exports = gostFunctionForCoding;
 }

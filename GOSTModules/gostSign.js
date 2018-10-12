@@ -33,13 +33,11 @@
  *
  */
 
-const GostRandom = require('./gostRandom');
-const GostDigest = require('./gostDigest');
 //unify browser and node
+
 if (typeof _this ==='undefined') {
     var _this = this;
 }
-
 if (_this.window === undefined) {
     _this.GostDigest = require('./gostDigest');
     _this.GostRandom = require('./gostRandom')
@@ -48,7 +46,7 @@ if (_this.window === undefined) {
     _this.GostRandom =  _this.GostRandom ? _this.GostRandom : gostFunctionForRandom;
 }
 
-let gostFunctionsForSign = (function () {
+let gostFunctionForSign = (function () {
 
     /*
      * Predefined curves and params collection
@@ -1483,7 +1481,7 @@ let gostFunctionsForSign = (function () {
     }
 
     function getSeed(length) {
-        let gostRandom = GostRandom || root.GostRandom;
+        let gostRandom = _this.GostRandom || root.GostRandom;
         var randomSource = gostRandom ? new (gostRandom || root.gostRandom) : rootCrypto;
         if (randomSource.getRandomValues) {
             var d = new Uint8Array(Math.ceil(length / 8));
@@ -2016,12 +2014,12 @@ let gostFunctionsForSign = (function () {
             }
             hash.procreator = hash.procreator || algorithm.procreator;
 
-            if (!GostDigest)
-                GostDigest = root.GostDigest;
-            if (!GostDigest)
+            if (!_this.GostDigest)
+                _this.GostDigest = root.GostDigest;
+            if (!_this.GostDigest)
                 throw new NotSupportedError('Object GostDigest not found');
 
-            this.hash = new GostDigest(hash);
+            this.hash = new _this.GostDigest(hash);
         }
 
         // Pregenerated seed for key exchange algorithms
@@ -2034,5 +2032,5 @@ let gostFunctionsForSign = (function () {
 })();
 
 if (this.window === undefined) {
-    module.exports = gostFunctionsForSign;
+    module.exports = gostFunctionForSign;
 }

@@ -33,7 +33,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-const GostRandom = require('./gostRandom');
+//const GostRandom = require('./gostRandom');
 //unify browser and node
 if (typeof _this ==='undefined') {
     var _this = this;

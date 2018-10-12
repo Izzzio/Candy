@@ -17,15 +17,16 @@ if (typeof _this ==='undefined') {
 if (_this.window === undefined) {
     _this.DigitalSignature = require('./digitalSignature');
     _this.CryptoJS = require('crypto-js');
-    _this.coding = new (require('./GOSTModules/gostCoding'))();
+    _this.coding = require('./GOSTModules/gostCoding');
     _this.GostDigest = require('./GOSTModules/gostDigest');
     _this.CryptoJS = require('crypto-js');
     _this.GostSign = require('./GOSTModules/gostSign');
 } else {
     _this.GostDigest =  _this.GostDigest ?  _this.GostDigest : gostFunctionForDigest;
-    _this.coding = _this.coding ? _this.coding : gostFunctionForCoding;
+    _this.coding = _this.coding  ? _this.coding : gostFunctionForCoding;
     _this.CryptoJS = _this.CryptoJS ? _this.CryptoJS : CryptoJS;
     _this.GostSign = _this.GostSign ? _this.GostSign : gostFunctionForSign;
+    _this.DigitalSignature = _this.DigitalSignature ? _this.DigitalSignature : DigitalSignature;
 }
 
 const inputOutputFormat = 'hex';
@@ -75,6 +76,7 @@ class Cryptography {
         } else {
             this.digitalSignature = new _this.DigitalSignature();
         }
+            this.coding = new _this.coding();
     }
 
     /**
@@ -82,15 +84,15 @@ class Cryptography {
      * @param data
      * @returns {Buffer}
      */
-    static data2Buffer(data) {
+    data2Buffer(data) {
         let bData;
         try{
             //bData = Buffer.from(data);
-            bData = _this.coding.Chars.decode(data);
+            bData = this.coding.Chars.decode(data);
 
         } catch (e) {
            // bData = Buffer.from(JSON.stringify(data));
-            bData = _this.coding.Chars.decode(JSON.stringify(data));
+            bData = this.coding.Chars.decode(JSON.stringify(data));
         }
         return bData;
     }
@@ -104,8 +106,8 @@ class Cryptography {
         if (this.gostSign) {
             keyPair = this.gostSign.generateKey();
             //конвертируем в формат
-            keyPair.public = _this.coding.Hex.encode(keyPair.publicKey);
-            keyPair.private = _this.coding.Hex.encode(keyPair.privateKey);
+            keyPair.public = this.coding.Hex.encode(keyPair.publicKey);
+            keyPair.private = this.coding.Hex.encode(keyPair.privateKey);
         } else {
             keyPair = this.digitalSignature.generate();
             keyPair.private = repairKey(keyPair.private);
@@ -125,14 +127,15 @@ class Cryptography {
         if (this.gostSign) {
             let bData, bKey;
             //prepare data for processing
-            bData = Cryptography.data2Buffer(data);
-            bKey = _this.coding.Hex.decode(key);
+            bData = this.data2Buffer(data);
+            bKey = this.coding.Hex.decode(key);
 
             signedData = this.gostSign.sign(bKey, bData);
-            signedData = _this.coding.Hex.encode(signedData);
+            signedData = this.coding.Hex.encode(signedData);
         } else {
             signedData = this.digitalSignature.signData(data, key).sign;
         }
+        signedData = signedData.replace('\r\n',''); //delete wrong symbols
         return {data: data, sign: signedData};
     }
 
@@ -151,9 +154,9 @@ class Cryptography {
         let result;
         if (this.gostSign) {
             let bData, bKey, bSign;
-            bData = Cryptography.data2Buffer(data);
-            bKey = _this.coding.Hex.decode(key);
-            bSign = _this.coding.Hex.decode(sign);
+            bData = this.data2Buffer(data);
+            bKey = this.coding.Hex.decode(key);
+            bSign = this.coding.Hex.decode(sign);
             result = this.gostSign.verify(bKey, bSign, bData);
         } else {
             result = this.digitalSignature.verifyData(data, sign, key);
@@ -167,15 +170,15 @@ class Cryptography {
      * @returns {Buffer}
      */
     hash(data = '') {
-        let bData = Cryptography.data2Buffer(data);
+        let bData = this.data2Buffer(data);
         let hashBuffer;
         if (this.gostDigest) {
             hashBuffer = this.gostDigest.digest(bData);
         } else {
             hashBuffer = _this.CryptoJS.SHA256(data).toString();
-            hashBuffer = _this.coding.Hex.decode(hashBuffer); //make output independent to hash function type
+            hashBuffer = this.coding.Hex.decode(hashBuffer); //make output independent to hash function type
         }
-        return _this.coding.Hex.encode(hashBuffer);
+        return this.coding.Hex.encode(hashBuffer).replace('\r\n','');
     }
 }
 
