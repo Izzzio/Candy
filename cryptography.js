@@ -44,8 +44,7 @@ function repairKey(key) {
 
 class Cryptography {
     constructor(config){
-        if (!config){
-        } else {
+        if (config) {
             let ha = null;
             //настраиваем хэш
             switch (config.hashFunction) {
@@ -67,16 +66,16 @@ class Cryptography {
                     sa = {hash: "GOST R 34.11", length: 512, namedCurve: "T-512-A"};
                     break;
             }
-            //проверяем параметры хэша
-            if (ha !== null) {
-                this.gostDigest = new _this.GostDigest(ha);
-            }
-            //проверяем параметры подписи и ключей
-            if (sa !== null) {
-                this.gostSign = new _this.GostSign(sa);
-            } else {
-                this.digitalSignature = new DigitalSignature();
-            }
+        }
+        //проверяем параметры хэша
+        if (ha) {
+            this.gostDigest = new _this.GostDigest(ha);
+        }
+        //проверяем параметры подписи и ключей
+        if (sa) {
+            this.gostSign = new _this.GostSign(sa);
+        } else {
+            this.digitalSignature = new DigitalSignature();
         }
     }
 
