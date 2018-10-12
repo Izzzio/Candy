@@ -44,19 +44,17 @@ function repairKey(key) {
 
 class Cryptography {
     constructor(config){
+        let ha,sa;
         if (config) {
-            let ha = null;
             //настраиваем хэш
             switch (config.hashFunction) {
                 case 'STRIBOG':
                     ha = {length: 256};
                     break;
                 case 'STRIBOG512':
-                    ha.length = {length: 256};
+                    ha = {length: 512};
                     break;
             }
-            let sa = null;
-
             //настраиваем подпись
             switch (config.signFunction) {
                 case 'GOST':
@@ -75,7 +73,7 @@ class Cryptography {
         if (sa) {
             this.gostSign = new _this.GostSign(sa);
         } else {
-            this.digitalSignature = new DigitalSignature();
+            this.digitalSignature = new _this.DigitalSignature();
         }
     }
 
