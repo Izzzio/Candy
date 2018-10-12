@@ -110,7 +110,7 @@ class Cryptography {
             keyPair.public = _this.coding.Hex.encode(keyPair.publicKey);
             keyPair.private = _this.coding.Hex.encode(keyPair.privateKey);
         } else {
-            keyPair = keypair({bits: 2048});
+            keyPair = this.digitalSignature.generate();
             keyPair.private = repairKey(keyPair.private);
             keyPair.public = repairKey(keyPair.public);
         }
@@ -134,10 +134,7 @@ class Cryptography {
             signedData = this.gostSign.sign(bKey, bData);
             signedData = _this.coding.Hex.encode(signedData);
         } else {
-            key = repairKey(key);
-            const _sign = crypto.createSign(SIGN_TYPE);
-            _sign.update(data);
-            signedData = _sign.sign(key).toString('hex');
+            signedData = this.digitalSignature.signData(data, key).sign;
         }
         return {data: data, sign: signedData};
     }
@@ -162,9 +159,7 @@ class Cryptography {
             bSign = _this.coding.Hex.decode(sign);
             result = this.gostSign.verify(bKey, bSign, bData);
         } else {
-            const verify = crypto.createVerify(SIGN_TYPE);
-            verify.update(data);
-            result = verify.verify(key, sign, inputOutputFormat);
+            result = this.digitalSignature.verifyData(data, sign, key);
         }
         return result;
     }
