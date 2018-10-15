@@ -31,25 +31,19 @@ class DApp {
          * @type {{registerMessageHandler: (function(): boolean), broadcastMessage: (function(): void), sendMessage: (function(): void), starwave: {registerMessageHandler: (function(): any), sendMessage: (function(): any), createMessage: (function(): any)}}}
          */
         this.messaging = {
-            registerMessageHandler: function () {
-                return that.candy.registerMessageHandler.apply(that.candy, arguments)
-            },
-            broadcastMessage: function () {
-                return that.candy.broadcastMessage.apply(that.candy, arguments)
-            },
-            sendMessage: function () {
-                return that.network.socketSend.apply(that, arguments)
-            },
+            registerMessageHandler: (args) => this.candy.registerMessageHandler(args),
+
+            broadcastMessage: (args) => this.candy.broadcastMessage(args),
+
+            sendMessage: (args) => this.network.socketSend(args),
+
             starwave: {
-                registerMessageHandler: function () {
-                    return that._starwave.registerMessageHandler.apply(that._starwave, arguments)
-                },
-                sendMessage: function () {
-                    return that._starwave.sendMessage.apply(that._starwave, arguments)
-                },
-                createMessage: function () {
-                    return that._starwave.createMessage.apply(that._starwave, arguments)
-                },
+                registerMessageHandler: (args) => this._starwave.registerMessageHandler(args),
+
+                sendMessage: (args) =>  this._starwave.sendMessage(args),
+
+                createMessage: (args) => this._starwave.createMessage(args),
+
             }
         };
 
@@ -94,16 +88,20 @@ class DApp {
     /**
      * Initiate Application start
      */
-    init() {
+    init(cb) {
         this.candy.start();
-
-    }
+        if (typeof cb === 'function'){
+            cb();
+        }
+    };
 
     /**
      * Terminating app
      */
     terminate(cb) {
-        cb();
+        if (typeof cb === 'function'){
+            cb();
+        }
     }
 }
 
