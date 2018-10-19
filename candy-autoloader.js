@@ -11,16 +11,25 @@ function CandyAutoloader(candy, checkInterval) {
     this.candy = candy;
     this._checkInterval = (typeof checkInterval === 'undefined' ? 1000 : checkInterval);
 
+    /**
+     * Starts watchdog timer on ready
+     */
     this.onready = function () {
         setInterval(function () {
             that.checkForLoad();
         }, that._checkInterval);
     };
 
+    /**
+     * Watchdog timer action
+     */
     this.checkForLoad = function () {
         that.imgAutoLoad();
     };
 
+    /**
+     * Load all Candy images
+     */
     this.imgAutoLoad = function () {
         let imgs = document.querySelectorAll('img[data-candy]');
         imgs.forEach(function (img, index) {

@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: starwaveProtocol.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: starwaveProtocol.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  iZ³ | Izzzio blockchain - https://izzz.io
  @author:  iZ³ Team (info@izzz.io)
  */
@@ -81,7 +109,7 @@ class starwaveProtocol {
         if(typeof that.candy !== 'undefined') {
             this.candy.registerMessageHandler(message, function (messageBody) {
                 if(messageBody.id === message || message.length === 0) {
-                    if(typeof  messageBody.mutex !== 'undefined' && typeof that._messageMutex[messageBody.mutex] === 'undefined') {
+                    if(typeof  messageBody.mutex !== 'undefined' &amp;&amp; typeof that._messageMutex[messageBody.mutex] === 'undefined') {
                         if(handler(messageBody)) {
                             that.handleMessageMutex(messageBody);
                             return true;
@@ -308,7 +336,7 @@ class starwaveProtocol {
      */
     getCurrentPeers(fullSockets) {
         return this.candy.sockets.map(function (s) {
-            if(s && s.readyState === 1) {
+            if(s &amp;&amp; s.readyState === 1) {
                 if(fullSockets) {
                     return s;
                 } else {
@@ -327,7 +355,7 @@ class starwaveProtocol {
         const sockets = this.getCurrentPeers(true);
         for (let i in sockets) {
             if(sockets.hasOwnProperty(i)) {
-                if(sockets[i] && sockets[i].nodeMetaInfo) {
+                if(sockets[i] &amp;&amp; sockets[i].nodeMetaInfo) {
                     if(sockets[i].nodeMetaInfo.messageBusAddress === address) {
                         return sockets[i];
                     }
@@ -346,7 +374,7 @@ class starwaveProtocol {
      */
     broadcast(message, excludeIp) {
         let i;
-        for (i = 0; i < this.candy.sockets.length; i++) {
+        for (i = 0; i &lt; this.candy.sockets.length; i++) {
             let socket = this.candy.sockets[i];
             if(typeof excludeIp === 'undefined' || socket !== excludeIp) {
                 this.write(socket, message);
@@ -375,8 +403,8 @@ class starwaveProtocol {
         const sockets = this.getCurrentPeers(true);
         let socketsOnBus = 0;
         const socketsNumber = sockets.length;
-        for (let i = 0; i < socketsNumber; i++) {
-            if(sockets[i] && sockets[i].nodeMetaInfo) {
+        for (let i = 0; i &lt; socketsNumber; i++) {
+            if(sockets[i] &amp;&amp; sockets[i].nodeMetaInfo) {
                 if(sockets[i].nodeMetaInfo.messageBusAddress === busAddress) {
                     socketsOnBus++;
                 }
@@ -395,4 +423,26 @@ class starwaveProtocol {
 //unify browser and node
 if(this.window === undefined) {
     module.exports = starwaveProtocol;
-}
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DigitalSignature.html">DigitalSignature</a></li><li><a href="StarwaveCrypto.html">StarwaveCrypto</a></li><li><a href="starwaveProtocol.html">starwaveProtocol</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allowMultiplySocketsOnBus">allowMultiplySocketsOnBus</a></li><li><a href="global.html#autoconnect">autoconnect</a></li><li><a href="global.html#block">block</a></li><li><a href="global.html#blockHeight">blockHeight</a></li><li><a href="global.html#broadcast">broadcast</a></li><li><a href="global.html#broadcastMessage">broadcastMessage</a></li><li><a href="global.html#checkForLoad">checkForLoad</a></li><li><a href="global.html#connectPeer">connectPeer</a></li><li><a href="global.html#getid">getid</a></li><li><a href="global.html#imgAutoLoad">imgAutoLoad</a></li><li><a href="global.html#loadResource">loadResource</a></li><li><a href="global.html#maxConnections">maxConnections</a></li><li><a href="global.html#messagesHandlers">messagesHandlers</a></li><li><a href="global.html#nodeList">nodeList</a></li><li><a href="global.html#ondata">ondata</a></li><li><a href="global.html#onmessage">onmessage</a></li><li><a href="global.html#onready">onready</a></li><li><a href="global.html#recieverAddress">recieverAddress</a></li><li><a href="global.html#registerMessageHandler">registerMessageHandler</a></li><li><a href="global.html#request">request</a></li><li><a href="global.html#requestApp">requestApp</a></li><li><a href="global.html#routes">routes</a></li><li><a href="global.html#secretKeys">secretKeys</a></li><li><a href="global.html#sockets">sockets</a></li><li><a href="global.html#start">start</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Oct 19 2018 19:14:54 GMT+0300 (RTZ 2 (зима))
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

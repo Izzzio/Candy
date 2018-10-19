@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: candy.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: candy.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * Candy
  * Blockchain driven Web Applications
  * @Author: Andrey Nedobylsky
@@ -164,7 +192,7 @@ function Candy(nodeList) {
      */
     this._dataRecieved = function (source, data) {
         //prevent multiple sockets on one busaddress
-        if(!this.allowMultiplySocketsOnBus && (this.starwave)) {
+        if(!this.allowMultiplySocketsOnBus &amp;&amp; (this.starwave)) {
             if(this.starwave.preventMultipleSockets(source) === 0) {
                 data = null;
                 return;
@@ -186,7 +214,7 @@ function Candy(nodeList) {
                 let blocks = JSON.parse(data.data);
                 for (let a in blocks) {
                     let block = blocks[a];
-                    if(that.blockHeight < block.index) {
+                    if(that.blockHeight &lt; block.index) {
                         that.blockHeight = block.index
                     }
                     //Loading requested resource
@@ -206,7 +234,7 @@ function Candy(nodeList) {
                 if(data.data.hasOwnProperty(a)) {
                     if(that.nodeList.indexOf(data.data[a]) == -1) {
                         that.nodeList.push(data.data[a]);
-                        if(that.getActiveConnections().length < that.maxConnections - 1) {
+                        if(that.getActiveConnections().length &lt; that.maxConnections - 1) {
                             that.connectPeer(data.data[a]);
                         }
                     }
@@ -216,7 +244,7 @@ function Candy(nodeList) {
         }
 
         if(data.type === MessageType.BROADCAST) {
-            /*if(that._lastMsgIndex < data.index) {*/
+            /*if(that._lastMsgIndex &lt; data.index) {*/
             if(data.reciver === that.recieverAddress) {
 
                 if(data.id === 'CANDY_APP_RESPONSE') {
@@ -340,7 +368,7 @@ function Candy(nodeList) {
             message = JSON.stringify(message);
         }
         for (let a in that.sockets) {
-            if(that.sockets.hasOwnProperty(a) && that.sockets[a] !== null) {
+            if(that.sockets.hasOwnProperty(a) &amp;&amp; that.sockets[a] !== null) {
                 try {
                     that.sockets[a].send(message);
                     sended = true;
@@ -386,10 +414,10 @@ function Candy(nodeList) {
      * @param {boolean} force reconnection
      */
     this.autoconnect = function (force) {
-        if(that.getActiveConnections().length < 1 || force) {
+        if(that.getActiveConnections().length &lt; 1 || force) {
             for (let a in that.nodeList) {
                 if(that.nodeList.hasOwnProperty(a)) {
-                    if(that.getActiveConnections().length < that.maxConnections - 1) {
+                    if(that.getActiveConnections().length &lt; that.maxConnections - 1) {
                         that.connectPeer(that.nodeList[a]);
                     }
                 }
@@ -406,7 +434,7 @@ function Candy(nodeList) {
     this.start = function () {
         for (let a in that.nodeList) {
             if(that.nodeList.hasOwnProperty(a)) {
-                if(that.getActiveConnections().length < that.maxConnections - 1) {
+                if(that.getActiveConnections().length &lt; that.maxConnections - 1) {
                     that.connectPeer(that.nodeList[a]);
                 }
             }
@@ -515,7 +543,7 @@ function Candy(nodeList) {
      * @param {Function} callback Callback function
      */
     this.loadResource = function (blockId, callback) {
-        if(blockId > that.blockHeigth && blockId < 1) {
+        if(blockId > that.blockHeigth &amp;&amp; blockId &lt; 1) {
             callback(404);
         }
         that._resourceQueue[blockId] = function (data, rawBlock) {
@@ -542,3 +570,26 @@ function Candy(nodeList) {
 if(this.window === undefined) {
     module.exports = Candy;
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DigitalSignature.html">DigitalSignature</a></li><li><a href="StarwaveCrypto.html">StarwaveCrypto</a></li><li><a href="starwaveProtocol.html">starwaveProtocol</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allowMultiplySocketsOnBus">allowMultiplySocketsOnBus</a></li><li><a href="global.html#autoconnect">autoconnect</a></li><li><a href="global.html#block">block</a></li><li><a href="global.html#blockHeight">blockHeight</a></li><li><a href="global.html#broadcast">broadcast</a></li><li><a href="global.html#broadcastMessage">broadcastMessage</a></li><li><a href="global.html#checkForLoad">checkForLoad</a></li><li><a href="global.html#connectPeer">connectPeer</a></li><li><a href="global.html#getid">getid</a></li><li><a href="global.html#imgAutoLoad">imgAutoLoad</a></li><li><a href="global.html#loadResource">loadResource</a></li><li><a href="global.html#maxConnections">maxConnections</a></li><li><a href="global.html#messagesHandlers">messagesHandlers</a></li><li><a href="global.html#nodeList">nodeList</a></li><li><a href="global.html#ondata">ondata</a></li><li><a href="global.html#onmessage">onmessage</a></li><li><a href="global.html#onready">onready</a></li><li><a href="global.html#recieverAddress">recieverAddress</a></li><li><a href="global.html#registerMessageHandler">registerMessageHandler</a></li><li><a href="global.html#request">request</a></li><li><a href="global.html#requestApp">requestApp</a></li><li><a href="global.html#routes">routes</a></li><li><a href="global.html#secretKeys">secretKeys</a></li><li><a href="global.html#sockets">sockets</a></li><li><a href="global.html#start">start</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Oct 19 2018 19:14:54 GMT+0300 (RTZ 2 (зима))
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

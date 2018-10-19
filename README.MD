@@ -40,6 +40,8 @@ candy.onready = function () {
 
 ## Documentation
 
+[API reference HERE](https://izzzio.github.io/Candy/docs/)
+
 **Creating Candy object**
 
 ```javascript
@@ -164,6 +166,6 @@ Also you can use block format url for loading resources
 4. Push to the branch (git push origin my-new-feature)
 5. Create a new Pull Request
 
-## Contributors
+## Maintainers
 
-- [lailune](https://github.com/lailune) Andrey Nedobylsky - creator, maintainer
+- [lailune](https://github.com/lailune) Andrey Nedobylsky - maintainer
