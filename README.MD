@@ -40,7 +40,7 @@ candy.onready = function () {
 
 ## Documentation
 
-[API reference HERE](https://izzzio.github.io/Candy/docs/)
+[API reference HERE](https://izzzio.github.io/Candy/docs/index.html)
 
 **Creating Candy object**
 
