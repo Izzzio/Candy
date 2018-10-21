@@ -45,6 +45,9 @@ function repairKey(key) {
 
 class Cryptography {
     constructor(config){
+        this.utils = require('./utils');
+        this.coding = new _this.coding();
+        this.config = config;
         let ha,sa;
         if (config) {
             //настраиваем хэш
@@ -76,7 +79,7 @@ class Cryptography {
         } else {
             this.digitalSignature = new _this.DigitalSignature();
         }
-            this.coding = new _this.coding();
+
     }
 
     /**
@@ -87,12 +90,10 @@ class Cryptography {
     data2Buffer(data) {
         let bData;
         try{
-            //bData = Buffer.from(data);
-            bData = this.coding.Chars.decode(data);
+            bData = this.coding.Chars.decode(data, 'utf8');
 
         } catch (e) {
-           // bData = Buffer.from(JSON.stringify(data));
-            bData = this.coding.Chars.decode(JSON.stringify(data));
+            bData = this.coding.Chars.decode(JSON.stringify(data), 'utf8');
         }
         return bData;
     }
@@ -105,13 +106,19 @@ class Cryptography {
         let keyPair;
         if (this.gostSign) {
             keyPair = this.gostSign.generateKey();
-            //конвертируем в формат
-            keyPair.public = this.coding.Hex.encode(keyPair.publicKey);
+            //convert to hex
+            keyPair.public = this.coding.Hex.encode(keyPair.publicKey).replace('\r\n','');
+            //convert to utf-16 gor compression
+            keyPair.public = this.utils.hexString2Unicode(keyPair.public);
             keyPair.private = this.coding.Hex.encode(keyPair.privateKey);
         } else {
             keyPair = this.digitalSignature.generate();
             keyPair.private = repairKey(keyPair.private);
             keyPair.public = repairKey(keyPair.public);
+        }
+        if (this.config.signFunction.toUpperCase() === 'NEWRSA'){
+            //get old rsa key in PEM format and convert to utf-16 with two steps
+
         }
         return {private: keyPair.private, public: keyPair.public};
     }
@@ -155,6 +162,8 @@ class Cryptography {
         if (this.gostSign) {
             let bData, bKey, bSign;
             bData = this.data2Buffer(data);
+            //convertion from utf16 to hex before using
+            key = this.utils.unicode2HexString(key);
             bKey = this.coding.Hex.decode(key);
             bSign = this.coding.Hex.decode(sign);
             result = this.gostSign.verify(bKey, bSign, bData);
@@ -185,3 +194,4 @@ class Cryptography {
 if (this.window === undefined) {
     module.exports = Cryptography;
 }
+
