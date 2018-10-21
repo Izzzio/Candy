@@ -21,12 +21,14 @@ if (_this.window === undefined) {
     _this.GostDigest = require('./GOSTModules/gostDigest');
     _this.CryptoJS = require('crypto-js');
     _this.GostSign = require('./GOSTModules/gostSign');
+    _this.utils = require('./utils');
 } else {
     _this.GostDigest =  _this.GostDigest ?  _this.GostDigest : gostFunctionForDigest;
     _this.coding = _this.coding  ? _this.coding : gostFunctionForCoding;
     _this.CryptoJS = _this.CryptoJS ? _this.CryptoJS : CryptoJS;
     _this.GostSign = _this.GostSign ? _this.GostSign : gostFunctionForSign;
     _this.DigitalSignature = _this.DigitalSignature ? _this.DigitalSignature : DigitalSignature;
+    _this.utils = _this.utils ? _this.utils : utils;
 }
 
 const inputOutputFormat = 'hex';
@@ -45,7 +47,7 @@ function repairKey(key) {
 
 class Cryptography {
     constructor(config){
-        this.utils = require('./utils');
+        this.utils = _this.utils;
         this.coding = new _this.coding();
         this.config = config;
         let ha,sa;
@@ -99,6 +101,56 @@ class Cryptography {
     }
 
     /**
+     * convert key from PEM format to hex string
+     * @param key PEM key
+     * @param kind kind of the key: public or private
+     * @returns {string} base64 encoded key
+     * @constructor
+     */
+    PEMToUtf16(key, kind = 'PUBLIC') {
+        let k = this.coding.PEM.decode(key, `rsa ${kind} key`);
+        let hex = this.coding.Hex.encode(k);
+        hex = hex.replace(new RegExp(/\r\n/, 'g'),"");
+        return this.utils.hexString2Unicode(hex);
+    }
+
+    /**
+     * convert key from hex string to PEM format
+     * @param key
+     * @param kind
+     * @returns {*|String|string|CryptoOperationData|Uint8Array}
+     * @constructor
+     */
+    utf16ToPem(key, kind = 'PUBLIC') {
+        key = this.utils.unicode2HexString(key).replace(new RegExp(/\r\n/, 'g'),"");
+        let k = this.coding.Hex.decode(key);
+        let pem = this.coding.PEM.encode(k, `RSA ${kind} KEY`);
+        return pem;
+    }
+
+    /**
+     * convert ArrayBuffer to unicode string
+     * @param key {ArrayBuffer}
+     * @returns {*|string}
+     */
+    bufferToUtf16(key){
+     let k = this.coding.Hex.encode(key).replace(new RegExp(/\r\n/, 'g'),"");
+     k = this.utils.hexString2Unicode(k);
+     return k;
+    }
+
+    /**
+     * convert unicode string to ArrayBuffer
+     * @param key {string} unicode string
+     * @returns {*|string}
+     */
+    utf16ToBuffer(key){
+        let k = this.utils.unicode2HexString(key);
+        k = this.coding.Hex.decode(k);
+        return k;
+    }
+
+    /**
      * generates pair of keys
      * @returns {{private: *, public: *}}
      */
@@ -106,10 +158,7 @@ class Cryptography {
         let keyPair;
         if (this.gostSign) {
             keyPair = this.gostSign.generateKey();
-            //convert to hex
-            keyPair.public = this.coding.Hex.encode(keyPair.publicKey).replace('\r\n','');
-            //convert to utf-16 gor compression
-            keyPair.public = this.utils.hexString2Unicode(keyPair.public);
+            keyPair.public = this.bufferToUtf16(keyPair.publicKey);
             keyPair.private = this.coding.Hex.encode(keyPair.privateKey);
         } else {
             keyPair = this.digitalSignature.generate();
@@ -117,8 +166,8 @@ class Cryptography {
             keyPair.public = repairKey(keyPair.public);
         }
         if (this.config.signFunction.toUpperCase() === 'NEWRSA'){
-            //get old rsa key in PEM format and convert to utf-16 with two steps
-
+            //get old rsa key in PEM format and convert to utf-16
+            keyPair.public = this.PEMToUtf16(keyPair.public);
         }
         return {private: keyPair.private, public: keyPair.public};
     }
@@ -162,12 +211,14 @@ class Cryptography {
         if (this.gostSign) {
             let bData, bKey, bSign;
             bData = this.data2Buffer(data);
-            //convertion from utf16 to hex before using
-            key = this.utils.unicode2HexString(key);
-            bKey = this.coding.Hex.decode(key);
+            bKey = this.utf16ToBuffer(key);
             bSign = this.coding.Hex.decode(sign);
             result = this.gostSign.verify(bKey, bSign, bData);
         } else {
+            if (this.config.signFunction.toUpperCase() === 'NEWRSA'){
+                //get old rsa key in PEM format and convert to utf-16
+                key = this.utf16ToPem(key);
+            }
             result = this.digitalSignature.verifyData(data, sign, key);
         }
         return result;
