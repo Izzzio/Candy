@@ -46,14 +46,16 @@ function repairKey(key) {
 }
 
 class Cryptography {
-    constructor(config){
+    constructor(config = {}){
         this.utils = _this.utils;
         this.coding = new _this.coding();
         this.config = config;
+        this.config.hashFunction = this.config.hashFunction ? this.config.hashFunction.toUpperCase() : this.config.hashFunction;
+        this.config.signFunction = this.config.signFunction ? this.config.signFunction.toUpperCase() : this.config.signFunction;
         let ha,sa;
         if (config) {
             //настраиваем хэш
-            switch (config.hashFunction) {
+            switch (this.config.hashFunction) {
                 case 'STRIBOG':
                     ha = {length: 256};
                     break;
@@ -62,7 +64,7 @@ class Cryptography {
                     break;
             }
             //настраиваем подпись
-            switch (config.signFunction) {
+            switch (this.config.signFunction) {
                 case 'GOST':
                     sa = {hash: "GOST R 34.11", length: 256};
                     break;
@@ -165,7 +167,7 @@ class Cryptography {
             keyPair.private = repairKey(keyPair.private);
             keyPair.public = repairKey(keyPair.public);
         }
-        if (this.config.signFunction.toUpperCase() === 'NEWRSA'){
+        if (this.config.signFunction === 'NEWRSA'){
             //get old rsa key in PEM format and convert to utf-16
             keyPair.public = this.PEMToUtf16(keyPair.public);
         }
@@ -215,11 +217,10 @@ class Cryptography {
             bSign = this.coding.Hex.decode(sign);
             result = this.gostSign.verify(bKey, bSign, bData);
         } else {
-            if (this.config.signFunction.toUpperCase() === 'NEWRSA'){
-                //get old rsa key in PEM format and convert to utf-16
-                key = this.utf16ToPem(key);
-            }
-            result = this.digitalSignature.verifyData(data, sign, key);
+            let k = key;
+            //convert key if it's not in PEM
+            k = k.indexOf('RSA PUBLIC KEY') < 0 ?  this.utf16ToPem(k,'PUBLIC') : k;
+            result = this.digitalSignature.verifyData(data, sign, k);
         }
         return result;
     }
