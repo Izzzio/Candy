@@ -21,7 +21,8 @@ const MessageType = {
     MY_PEERS: 3,
     BROADCAST: 4,
     META: 5,
-    SW_BROADCAST: 6
+    SW_BROADCAST: 6,
+    TRANS_COLL:7,
 };
 
 const BlockchainRequestors = {
