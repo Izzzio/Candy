@@ -1,5 +1,5 @@
 {
-  "name": "candy",
+  "name": "iz3-candy",
   "version": "1.0.0",
   "description": "iZ³ blockchain connection provider for browsers",
   "main": "candy.js",
