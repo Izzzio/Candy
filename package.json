@@ -2,7 +2,7 @@
   "name": "candy",
   "version": "1.0.0",
   "description": "iZ³ blockchain connection provider for browsers",
-  "main": "main.js",
+  "main": "candy.js",
   "dependencies": {
     "crypto-js": "file:crypto-js",
     "elliptic": "^6.4.1",
@@ -10,18 +10,26 @@
     "node-forge": "^0.7.6",
     "ws": "^6.0.0"
   },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Izzzio/Candy.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Andrey Nedobyslky <admin@twister-vl.ru> (https://github.com/lailune)",
+  "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/Izzzio/Candy/issues"
+    "url": "https://github.com/Izzzio/Candy/issues",
+    "email": "info@izzz.io"
   },
-  "homepage": "https://github.com/Izzzio/Candy#readme"
+  "homepage": "https://github.com/Izzzio/Candy#readme",
+  "keywords": [
+    "blockchain",
+    "p2p",
+    "peer2peer",
+    "dlt",
+    "node",
+    "bignet",
+    "iz3",
+    "izzz",
+    "izzzio"
+  ]
 }
