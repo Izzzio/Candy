@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>StarWave Candy demo</title>
+
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #0f0f0f;
+            text-align: center;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+
+<h1>Second</h1>
+
+<h3 id="recivedMessage">Connecting...</h3>
+
+<p style="font-weight: 500">Current blockchain info:</p>
+<b>Blockchain height: </b><span id="height">0</span> <br>
+<b>Active connections: </b><span id="connections">0</span> <br>
+
+<script src="../../candy.js"></script>
+<script src="../../moment.js"></script>
+<script src="../../NodeMetaInfo.js"></script>
+<script src="../../starwaveProtocol.js"></script>
+<script>
+
+    const MESSAGE_ID = 'test';
+
+    function sendMessage(to, message){
+	let msg = candy.starwave.createMessage(message,to,undefined, MESSAGE_ID);
+    }
+
+    let pingCount = 0;
+
+    var candy = new Candy(["ws://176.9.104.200:6031"]).start();
+    candy.recieverAddress = 'second';
+    candy.onready = function () {
+        candy.starwave.registerMessageHandler(MESSAGE_ID,function(message){
+		document.querySelector('#recivedMessage').textContent = message.data;
+	});
+
+	
+    };
+
+    setInterval(function () {
+        document.getElementById('height').innerHTML = candy.blockHeight;
+        document.getElementById('connections').innerHTML = candy.getActiveConnections().length;
+    }, 1000);
+
+</script>
+</body>
+</html>
