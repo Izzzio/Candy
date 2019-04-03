@@ -286,6 +286,11 @@ function Candy(nodeList) {
     this.connectPeer = function (peer) {
         let socket = null;
         try {
+           for(let connection of that.getActiveConnections()){
+               if(connection.url === peer){
+                   return;
+               }
+           }
             socket = new this.WebSocket(peer);
         } catch (e) {
             return;
@@ -294,7 +299,7 @@ function Candy(nodeList) {
         socket.onopen = function () {
             setTimeout(function () {
                 if(typeof that.onready !== 'undefined') {
-                    if(typeof  that._autoloader !== 'undefined') {
+                    if(typeof that._autoloader !== 'undefined') {
                         that._autoloader.onready();
                     }
                     that.onready();
@@ -304,7 +309,7 @@ function Candy(nodeList) {
         };
 
         socket.onclose = function (event) {
-            that.sockets.splice(that.sockets.indexOf(socket), 1);
+            that.sockets.splice(that.sockets.indexOf(event.socket), 1);
             // that.sockets[that.sockets.indexOf(socket)] = null;
             // delete that.sockets[that.sockets.indexOf(socket)];
         };
@@ -322,9 +327,9 @@ function Candy(nodeList) {
         };
         if(_this.window === undefined) {
             socket.on('open', () => socket.onopen());
-            socket.on('close', () => socket.onclose());
+            socket.on('close', () => socket.onclose);
             socket.on('message', () => socket.onmessage());
-            socket.on('error', () => socket.onerror());
+            socket.on('error', () => socket.onerror);
         }
         that.sockets.push(socket);
     };

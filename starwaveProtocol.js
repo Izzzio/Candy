@@ -81,8 +81,8 @@ class starwaveProtocol {
         if(typeof that.candy !== 'undefined') {
             this.candy.registerMessageHandler(message, function (messageBody) {
                 if(messageBody.id === message || message.length === 0) {
-                    if(typeof  messageBody.mutex !== 'undefined' && typeof that._messageMutex[messageBody.mutex] === 'undefined') {
-                        if(handler(messageBody)) {
+                    if(typeof messageBody.mutex !== 'undefined' && typeof that._messageMutex[messageBody.mutex] === 'undefined') {
+                        if(handler(messageBody) !== false) {
                             that.handleMessageMutex(messageBody);
                             return true;
                         } else {
@@ -112,7 +112,7 @@ class starwaveProtocol {
             } else {
                 let socket = this.getSocketByBusAddress(messageBusAddress);
 
-                if(!socket) {  //no such connected socket
+                if(!socket || socket.readyState === 0) {  //no such connected socket
                     return false;
                 } else {
                     //add this node address if the route isn't complete
@@ -348,10 +348,12 @@ class starwaveProtocol {
         let i;
         for (i = 0; i < this.candy.sockets.length; i++) {
             let socket = this.candy.sockets[i];
-            if(typeof excludeIp === 'undefined' || socket !== excludeIp) {
-                this.write(socket, message);
-            } else {
+            if(socket.readyState !== 0) {
+                if(typeof excludeIp === 'undefined' || socket !== excludeIp) {
+                    this.write(socket, message);
+                } else {
 
+                }
             }
         }
     }
